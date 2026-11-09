@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Ezequiel — portfólio de segurança ofensiva.">
+<title>Vikings — Ezequiel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+  /* Layout: console de terminal em coluna única — hero com prompt, trilha de certs,
+     grade de writeups; cada writeup é uma "view" roteada por hash. Tema único dark. */
+  :root{
+    --bg:#0a0e0d;
+    --panel:#111917;
+    --panel-2:#0d1413;
+    --fg:#cad7d0;
+    --muted:#72857c;
+    --line:#1d2a27;
+    --accent:#36d07f;      /* verde terminal */
+    --cyan:#49c3e6;        /* links / tags */
+    --crit:#ff5f6e;        /* crítico */
+    --warn:#f0b24a;        /* alto/médio */
+    --mono:'JetBrains Mono',ui-monospace,'SF Mono',Menlo,Consolas,monospace;
+    --sans:'IBM Plex Sans',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+    color-scheme:dark;
+  }
+  *{box-sizing:border-box}
+  body{
+    background:var(--bg);color:var(--fg);
+    font-family:var(--sans);line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+    background-image:
+      radial-gradient(1200px 500px at 80% -10%, rgba(54,208,127,.07), transparent 60%),
+      radial-gradient(900px 500px at -10% 10%, rgba(73,195,230,.05), transparent 55%);
+  }
+  .wrap{max-width:60rem;margin-inline:auto;
+    padding-left:max(18px,env(safe-area-inset-left,0px));
+    padding-right:max(18px,env(safe-area-inset-right,0px));}
+  a{color:var(--cyan);text-decoration:none}
+  a:hover{text-decoration:underline}
+  code,kbd{font-family:var(--mono)}
+  h1,h2,h3{text-wrap:balance;line-height:1.2;margin:0}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:4px}
+
+  /* top bar */
+  .topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;
+    background:rgba(10,14,13,.86);backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);}
+  body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);
+    background:rgba(10,14,13,.95);z-index:10}
+  .topbar .wrap{display:flex;align-items:center;justify-content:space-between;
+    gap:1rem;flex-wrap:wrap;padding-block:.7rem}
+  .brand{font-family:var(--mono);font-weight:700;color:var(--fg);font-size:1.02rem}
+  .brand .p{color:var(--accent)}
+  .blink{color:var(--accent);animation:blink 1.1s steps(1) infinite}
+  @keyframes blink{50%{opacity:0}}
+  .topbar nav{display:flex;gap:.3rem;flex-wrap:wrap;font-family:var(--mono);font-size:.82rem}
+  .topbar nav a{color:var(--muted);padding:.3rem .55rem;border-radius:6px}
+  .topbar nav a:hover{color:var(--accent);background:var(--panel);text-decoration:none}
+
+  /* hero terminal */
+  .hero{padding-block:2.4rem 1rem}
+  .term{background:var(--panel);border:1px solid var(--line);border-radius:12px;
+    overflow:hidden;box-shadow:0 20px 50px -30px rgba(0,0,0,.8)}
+  .term-bar{display:flex;align-items:center;gap:.5rem;padding:.65rem .9rem;
+    border-bottom:1px solid var(--line);background:var(--panel-2)}
+  .dot{width:.72rem;height:.72rem;border-radius:50%;background:#2b3a36}
+  .dot.r{background:#ff5f6e55}.dot.y{background:#f0b24a55}.dot.g{background:#36d07f55}
+  .term-title{margin-left:.4rem;font-family:var(--mono);font-size:.76rem;color:var(--muted)}
+  .term-body{padding:1.2rem 1.1rem;font-family:var(--mono);font-size:.92rem}
+  .cmd{color:var(--muted)}
+  .cmd b{color:var(--accent);font-weight:500}
+  .out{margin:.35rem 0 1.15rem;color:var(--fg)}
+  .out .name{font-size:1.9rem;font-weight:700;letter-spacing:-.5px;display:block;margin-bottom:.2rem}
+  .out .tag{color:var(--cyan)}
+  .out .dim{color:var(--muted)}
+  .hero-p{font-family:var(--sans);line-height:1.65;max-width:62ch}
+
+  section.block{padding-block:2.2rem}
+  .eyebrow{font-family:var(--mono);font-size:.76rem;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--accent);margin-bottom:.9rem}
+  .eyebrow::before{content:"# "}
+  h2.title{font-size:1.5rem;font-weight:600;margin-bottom:.4rem}
+  .lead{color:var(--muted);max-width:62ch;margin-bottom:1.3rem}
+
+  /* trilha */
+  .trilha{display:flex;flex-wrap:wrap;gap:.55rem;align-items:stretch}
+  .cert{flex:1 1 8.5rem;min-width:8.5rem;background:var(--panel);border:1px solid var(--line);
+    border-radius:10px;padding:.8rem .85rem;display:flex;flex-direction:column;gap:.35rem}
+  .cert .n{font-family:var(--mono);font-weight:700;font-size:.95rem}
+  .cert .s{font-size:.72rem;font-family:var(--mono);text-transform:uppercase;letter-spacing:.06em}
+  .cert.now{border-color:var(--accent)}
+  .cert.now .s{color:var(--accent)}
+  .cert .s.plan{color:var(--muted)}
+  .arrow{align-self:center;color:var(--muted);font-family:var(--mono)}
+
+  /* writeups grid */
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(16.5rem,1fr));gap:1rem}
+  .card{display:flex;flex-direction:column;gap:.6rem;background:var(--panel);
+    border:1px solid var(--line);border-radius:12px;padding:1.1rem;min-width:0;
+    transition:border-color .15s,transform .15s}
+  .card:hover{border-color:var(--accent);transform:translateY(-2px);text-decoration:none}
+  .card .top{display:flex;justify-content:space-between;gap:.6rem;align-items:center}
+  .plat{font-family:var(--mono);font-size:.7rem;color:var(--muted);
+    border:1px solid var(--line);border-radius:999px;padding:.15rem .5rem;white-space:nowrap}
+  .diff{font-family:var(--mono);font-size:.7rem;font-weight:700}
+  .diff.critico{color:var(--crit)}.diff.alto{color:var(--warn)}.diff.estudo{color:var(--cyan)}
+  .card h3{font-size:1.08rem;font-weight:600;color:var(--fg)}
+  .card p{margin:0;color:var(--muted);font-size:.9rem;min-width:0}
+  .tags{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:auto}
+  .tag{font-family:var(--mono);font-size:.68rem;color:var(--cyan);
+    background:rgba(73,195,230,.08);border:1px solid rgba(73,195,230,.18);
+    border-radius:6px;padding:.1rem .4rem}
+  .card .go{font-family:var(--mono);font-size:.8rem;color:var(--accent)}
+
+  /* platform / section heads + empty states */
+  .plat-head{display:flex;align-items:baseline;gap:.7rem;flex-wrap:wrap;margin-bottom:.9rem}
+  .plat-head .eyebrow{margin-bottom:0}
+  .count{font-family:var(--mono);font-size:.72rem;color:var(--muted);
+    border:1px solid var(--line);border-radius:999px;padding:.12rem .55rem}
+  .empty{border:1px dashed var(--line);border-radius:12px;padding:1.3rem 1.2rem;
+    color:var(--muted);font-family:var(--mono);font-size:.86rem;background:var(--panel-2);line-height:1.7}
+  .empty b{color:var(--fg);font-weight:600}
+
+  /* writeup view */
+  .writeup{display:none;padding-top:1.6rem}
+  .writeup h1{font-size:1.65rem;font-weight:700;margin-bottom:.5rem}
+  .writeup h1:focus{outline:none}
+  .back{font-family:var(--mono);font-size:.82rem;color:var(--muted);display:inline-block;margin-bottom:1.3rem}
+  .back:hover{color:var(--accent);text-decoration:none}
+  .meta-row{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1.4rem;align-items:center}
+  .wu-sec{margin-block:1.8rem}
+  .wu-sec h2{font-family:var(--mono);font-size:1.02rem;color:var(--accent);margin-bottom:.8rem}
+  .wu-sec h2::before{content:"$ ";color:var(--muted)}
+  .steps{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:1rem}
+  .steps li{display:grid;grid-template-columns:2rem 1fr;gap:.7rem;min-width:0}
+  .steps .num{font-family:var(--mono);color:var(--accent);font-weight:700;
+    border:1px solid var(--line);border-radius:7px;height:1.9rem;display:grid;place-items:center}
+  .steps .body{min-width:0}
+  .steps .st{font-weight:600;display:block;margin-bottom:.15rem}
+  .steps p{margin:.1rem 0;color:var(--muted);font-size:.92rem}
+  pre{background:var(--panel-2);border:1px solid var(--line);border-radius:9px;
+    padding:.8rem .9rem;overflow-x:auto;margin:.55rem 0 0}
+  pre code{font-size:.82rem;color:var(--fg);white-space:pre}
+  .mech{background:var(--panel);border-left:3px solid var(--accent);
+    border-radius:0 9px 9px 0;padding:1rem 1.1rem}
+  .mech p{margin:.4rem 0}
+  .fix{background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:1rem 1.1rem}
+  .fix ul{margin:.3rem 0 0;padding-left:1.1rem}.fix li{margin:.3rem 0;color:var(--muted)}
+  .gate{background:var(--panel-2);border:1px dashed var(--line);border-radius:9px;padding:1rem 1.1rem}
+  .gate .q{font-family:var(--mono);font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;color:var(--warn);margin-bottom:.5rem}
+  .gate ol{margin:0;padding-left:1.2rem}.gate li{margin:.25rem 0;color:var(--fg)}
+  .masked{color:var(--muted);font-style:italic}
+
+  footer{border-top:1px solid var(--line);margin-top:2rem;padding-block:1.8rem 2.4rem}
+  footer .wrap{display:flex;flex-wrap:wrap;gap:.8rem 1.4rem;justify-content:space-between;align-items:center}
+  .links{display:flex;gap:1rem;flex-wrap:wrap;font-family:var(--mono);font-size:.85rem}
+  .foot-note{font-family:var(--mono);font-size:.74rem;color:var(--muted)}
+  @media (prefers-reduced-motion:reduce){.blink{animation:none}.card{transition:none}}
+.writeup{display:block}</style>
+</head>
+<body>
+<header class="topbar"><div class="wrap">
+  <a class="brand" href="../index.html"><span class="p">~/</span>ezequiel<span class="blink">_</span></a>
+  <nav><a href="../index.html#labs">labs</a><a href="../index.html#htb">htb</a><a href="../index.html#thm">thm</a><a href="../index.html#vulnhub">vulnhub</a><a href="../index.html#artigos">artigos</a><a href="../index.html#projetos">projetos</a><a href="../index.html#contato">contato</a></nav>
+</div></header>
+<section class="writeup" id="vikings"><div class="wrap">
+  <a class="back" href="../index.html#vulnhub">← voltar ao portfólio</a>
+  <h1>Vikings — da web ao root</h1>
+  <div class="meta-row">
+    <span class="plat">VulnHub</span>
+    <span class="diff critico">CRÍTICO</span>
+    <span class="tag">dir enum</span><span class="tag">info disclosure</span><span class="tag">password cracking</span>
+    <span class="tag">esteganografia</span><span class="tag">cred vazada</span><span class="tag">RPyC privesc</span>
+  </div>
+
+  <div class="wu-sec">
+    <h2>resumo</h2>
+    <p style="color:var(--muted)">Boot2root da VulnHub. O caminho encadeia enumeração web → um bloco Base64 que esconde um ZIP com senha fraca (quebrada no John) → esteganografia numa imagem JPEG escondendo credenciais → acesso SSH (foothold) → privesc por um serviço RPyC rodando como root e sem autenticação.</p>
+  </div>
+
+  <div class="wu-sec">
+    <h2>a cadeia</h2>
+    <ol class="steps">
+      <li><span class="num">1</span><div class="body"><span class="st">Recon — nmap</span>
+        <p>Dois serviços: SSH (OpenSSH 7.6p1) e HTTP (Apache 2.4.29). O script <code>http-ls</code> revela o diretório <code>/site/</code>, ponto de partida.</p>
+        <pre><code>nmap -Pn -p- -n -A -sS -sV 192.168.56.101</code></pre></div></li>
+      <li><span class="num">2</span><div class="body"><span class="st">Enumeração de diretórios</span>
+        <p>Fuzzing em <code>/site/</code> acha <code>war.txt</code> (HTTP 200), que aponta para o diretório oculto <code>/war-is-over</code>.</p>
+        <pre><code>gobuster dir -u http://192.168.56.101/site/ \
+  -w common.txt -x php,txt,bak,zip</code></pre></div></li>
+      <li><span class="num">3</span><div class="body"><span class="st">Info disclosure — Base64</span>
+        <p><code>/war-is-over</code> devolve um bloco enorme em Base64. Base64 não é criptografia — é codificação reversível; decodificar gera um ZIP protegido por senha.</p>
+        <pre><code>curl http://192.168.56.101/site/war-is-over/ | base64 -d &gt; descripto</code></pre></div></li>
+      <li><span class="num">4</span><div class="body"><span class="st">Senha fraca — John the Ripper</span>
+        <p>A senha do ZIP era fraca: extraída com <code>zip2john</code> e quebrada por dicionário (rockyou).</p>
+        <pre><code>zip2john descripto.zip &gt; hash.txt
+john hash.txt --wordlist=rockyou.txt   # → <span class="masked">[senha — mascarada]</span></code></pre></div></li>
+      <li><span class="num">5</span><div class="body"><span class="st">Esteganografia — ZIP embutido em JPEG</span>
+        <p>Dentro do ZIP havia a imagem <code>king</code> (JPEG) com um ZIP concatenado após o fim da imagem (binwalk acha a assinatura no offset <code>0x15D03F</code>). Recortar e extrair revela as credenciais do usuário <code>floki</code>.</p>
+        <pre><code>binwalk king
+tail -c +1429568 king &gt; king.zip
+unzip king.zip &amp;&amp; cat user   # → floki : <span class="masked">[mascarada]</span></code></pre></div></li>
+      <li><span class="num">6</span><div class="body"><span class="st">Foothold — SSH como floki</span>
+        <p>Login SSH com as credenciais da imagem (Ubuntu 18.04). Flag de usuário em <code>/home/ragnar/user.txt</code>.</p>
+        <pre><code>ssh floki@192.168.56.101</code></pre></div></li>
+      <li><span class="num">7</span><div class="body"><span class="st">Privesc — RPyC como root sem autenticação</span>
+        <p>Um serviço <b>RPyC</b> (Remote Python Call) roda como root e aceita conexões sem autenticação = execução de código Python como root. <code>floki</code> não podia executar o <code>python3.6</code> do <code>ragnar</code> (permissões 754); copiar o binário cria um arquivo cujo dono é <code>floki</code>, com permissão de execução. Com um Python utilizável, conecta no RPyC e roda código como root → shell SUID.</p>
+        <pre><code>ps -eo pid,user,cmd | grep -i rpyc
+cp /usr/bin/python3.6 /tmp/py &amp;&amp; chmod +x /tmp/py
+# conecta no RPyC, executa como root, gera /tmp/rootbash SUID
+/tmp/rootbash -p   # uid=0 (root) → /root/root.txt</code></pre></div></li>
+    </ol>
+  </div>
+
+  <div class="wu-sec">
+    <h2>mecanismo — por que funciona</h2>
+    <div class="mech">
+      <p><b>Base64:</b> é codificação reversível, não criptografia — qualquer "segredo" guardado assim está em texto claro para quem decodificar.</p>
+      <p><b>Esteganografia / arquivo concatenado:</b> um JPEG válido continua válido com outro arquivo colado após o marcador de fim da imagem. O <code>binwalk</code> encontra a assinatura do ZIP num offset; você recorta a partir dali com <code>tail -c</code> e extrai.</p>
+      <p><b>RPyC como root:</b> o serviço executa objetos/código Python no próprio processo. Rodando como root e sem exigir autenticação, qualquer cliente executa código como root. Classe: autenticação ausente em serviço crítico (CWE-306). O truque do <code>cp</code> contorna a permissão 754 — copiar gera um novo arquivo de dono <code>floki</code>, que então pode executá-lo.</p>
+    </div>
+  </div>
+
+  <div class="wu-sec">
+    <h2>detecção / mitigação</h2>
+    <div class="fix"><ul>
+      <li>Nunca rodar serviço como root — privilégio mínimo. Exigir autenticação/ACL no RPyC ou restringir a escuta a <code>localhost</code>.</li>
+      <li>Senhas fortes; não guardar segredos em arquivos ou imagens acessíveis — usar cofre de segredos.</li>
+      <li>Não expor dado sensível no web; remover arquivos como <code>war.txt</code> e desabilitar listagem de diretório.</li>
+      <li><b>Detecção:</b> processo <code>python</code> filho de um serviço root ouvindo em porta incomum, e downloads de arquivos não referenciados (<code>.zip</code>/<code>.txt</code>) no log do Apache.</li>
+    </ul></div>
+  </div>
+</div></section>
+<footer><div class="wrap">
+  <span class="foot-note">// construído para estudo de pentest · labs próprios e autorizados</span>
+  <div class="links"><a href="../index.html">topo ↑</a><span class="foot-note">DCPT → eJPT → Security+ → PenTest+ → CPTS → OSCP</span></div>
+</div></footer>
+</body>
+</html>

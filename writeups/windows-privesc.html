@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Ezequiel — portfólio de segurança ofensiva.">
+<title>Scheduled Task Hijack — Ezequiel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+  /* Layout: console de terminal em coluna única — hero com prompt, trilha de certs,
+     grade de writeups; cada writeup é uma "view" roteada por hash. Tema único dark. */
+  :root{
+    --bg:#0a0e0d;
+    --panel:#111917;
+    --panel-2:#0d1413;
+    --fg:#cad7d0;
+    --muted:#72857c;
+    --line:#1d2a27;
+    --accent:#36d07f;      /* verde terminal */
+    --cyan:#49c3e6;        /* links / tags */
+    --crit:#ff5f6e;        /* crítico */
+    --warn:#f0b24a;        /* alto/médio */
+    --mono:'JetBrains Mono',ui-monospace,'SF Mono',Menlo,Consolas,monospace;
+    --sans:'IBM Plex Sans',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+    color-scheme:dark;
+  }
+  *{box-sizing:border-box}
+  body{
+    background:var(--bg);color:var(--fg);
+    font-family:var(--sans);line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+    background-image:
+      radial-gradient(1200px 500px at 80% -10%, rgba(54,208,127,.07), transparent 60%),
+      radial-gradient(900px 500px at -10% 10%, rgba(73,195,230,.05), transparent 55%);
+  }
+  .wrap{max-width:60rem;margin-inline:auto;
+    padding-left:max(18px,env(safe-area-inset-left,0px));
+    padding-right:max(18px,env(safe-area-inset-right,0px));}
+  a{color:var(--cyan);text-decoration:none}
+  a:hover{text-decoration:underline}
+  code,kbd{font-family:var(--mono)}
+  h1,h2,h3{text-wrap:balance;line-height:1.2;margin:0}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:4px}
+
+  /* top bar */
+  .topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;
+    background:rgba(10,14,13,.86);backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);}
+  body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);
+    background:rgba(10,14,13,.95);z-index:10}
+  .topbar .wrap{display:flex;align-items:center;justify-content:space-between;
+    gap:1rem;flex-wrap:wrap;padding-block:.7rem}
+  .brand{font-family:var(--mono);font-weight:700;color:var(--fg);font-size:1.02rem}
+  .brand .p{color:var(--accent)}
+  .blink{color:var(--accent);animation:blink 1.1s steps(1) infinite}
+  @keyframes blink{50%{opacity:0}}
+  .topbar nav{display:flex;gap:.3rem;flex-wrap:wrap;font-family:var(--mono);font-size:.82rem}
+  .topbar nav a{color:var(--muted);padding:.3rem .55rem;border-radius:6px}
+  .topbar nav a:hover{color:var(--accent);background:var(--panel);text-decoration:none}
+
+  /* hero terminal */
+  .hero{padding-block:2.4rem 1rem}
+  .term{background:var(--panel);border:1px solid var(--line);border-radius:12px;
+    overflow:hidden;box-shadow:0 20px 50px -30px rgba(0,0,0,.8)}
+  .term-bar{display:flex;align-items:center;gap:.5rem;padding:.65rem .9rem;
+    border-bottom:1px solid var(--line);background:var(--panel-2)}
+  .dot{width:.72rem;height:.72rem;border-radius:50%;background:#2b3a36}
+  .dot.r{background:#ff5f6e55}.dot.y{background:#f0b24a55}.dot.g{background:#36d07f55}
+  .term-title{margin-left:.4rem;font-family:var(--mono);font-size:.76rem;color:var(--muted)}
+  .term-body{padding:1.2rem 1.1rem;font-family:var(--mono);font-size:.92rem}
+  .cmd{color:var(--muted)}
+  .cmd b{color:var(--accent);font-weight:500}
+  .out{margin:.35rem 0 1.15rem;color:var(--fg)}
+  .out .name{font-size:1.9rem;font-weight:700;letter-spacing:-.5px;display:block;margin-bottom:.2rem}
+  .out .tag{color:var(--cyan)}
+  .out .dim{color:var(--muted)}
+  .hero-p{font-family:var(--sans);line-height:1.65;max-width:62ch}
+
+  section.block{padding-block:2.2rem}
+  .eyebrow{font-family:var(--mono);font-size:.76rem;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--accent);margin-bottom:.9rem}
+  .eyebrow::before{content:"# "}
+  h2.title{font-size:1.5rem;font-weight:600;margin-bottom:.4rem}
+  .lead{color:var(--muted);max-width:62ch;margin-bottom:1.3rem}
+
+  /* trilha */
+  .trilha{display:flex;flex-wrap:wrap;gap:.55rem;align-items:stretch}
+  .cert{flex:1 1 8.5rem;min-width:8.5rem;background:var(--panel);border:1px solid var(--line);
+    border-radius:10px;padding:.8rem .85rem;display:flex;flex-direction:column;gap:.35rem}
+  .cert .n{font-family:var(--mono);font-weight:700;font-size:.95rem}
+  .cert .s{font-size:.72rem;font-family:var(--mono);text-transform:uppercase;letter-spacing:.06em}
+  .cert.now{border-color:var(--accent)}
+  .cert.now .s{color:var(--accent)}
+  .cert .s.plan{color:var(--muted)}
+  .arrow{align-self:center;color:var(--muted);font-family:var(--mono)}
+
+  /* writeups grid */
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(16.5rem,1fr));gap:1rem}
+  .card{display:flex;flex-direction:column;gap:.6rem;background:var(--panel);
+    border:1px solid var(--line);border-radius:12px;padding:1.1rem;min-width:0;
+    transition:border-color .15s,transform .15s}
+  .card:hover{border-color:var(--accent);transform:translateY(-2px);text-decoration:none}
+  .card .top{display:flex;justify-content:space-between;gap:.6rem;align-items:center}
+  .plat{font-family:var(--mono);font-size:.7rem;color:var(--muted);
+    border:1px solid var(--line);border-radius:999px;padding:.15rem .5rem;white-space:nowrap}
+  .diff{font-family:var(--mono);font-size:.7rem;font-weight:700}
+  .diff.critico{color:var(--crit)}.diff.alto{color:var(--warn)}.diff.estudo{color:var(--cyan)}
+  .card h3{font-size:1.08rem;font-weight:600;color:var(--fg)}
+  .card p{margin:0;color:var(--muted);font-size:.9rem;min-width:0}
+  .tags{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:auto}
+  .tag{font-family:var(--mono);font-size:.68rem;color:var(--cyan);
+    background:rgba(73,195,230,.08);border:1px solid rgba(73,195,230,.18);
+    border-radius:6px;padding:.1rem .4rem}
+  .card .go{font-family:var(--mono);font-size:.8rem;color:var(--accent)}
+
+  /* platform / section heads + empty states */
+  .plat-head{display:flex;align-items:baseline;gap:.7rem;flex-wrap:wrap;margin-bottom:.9rem}
+  .plat-head .eyebrow{margin-bottom:0}
+  .count{font-family:var(--mono);font-size:.72rem;color:var(--muted);
+    border:1px solid var(--line);border-radius:999px;padding:.12rem .55rem}
+  .empty{border:1px dashed var(--line);border-radius:12px;padding:1.3rem 1.2rem;
+    color:var(--muted);font-family:var(--mono);font-size:.86rem;background:var(--panel-2);line-height:1.7}
+  .empty b{color:var(--fg);font-weight:600}
+
+  /* writeup view */
+  .writeup{display:none;padding-top:1.6rem}
+  .writeup h1{font-size:1.65rem;font-weight:700;margin-bottom:.5rem}
+  .writeup h1:focus{outline:none}
+  .back{font-family:var(--mono);font-size:.82rem;color:var(--muted);display:inline-block;margin-bottom:1.3rem}
+  .back:hover{color:var(--accent);text-decoration:none}
+  .meta-row{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1.4rem;align-items:center}
+  .wu-sec{margin-block:1.8rem}
+  .wu-sec h2{font-family:var(--mono);font-size:1.02rem;color:var(--accent);margin-bottom:.8rem}
+  .wu-sec h2::before{content:"$ ";color:var(--muted)}
+  .steps{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:1rem}
+  .steps li{display:grid;grid-template-columns:2rem 1fr;gap:.7rem;min-width:0}
+  .steps .num{font-family:var(--mono);color:var(--accent);font-weight:700;
+    border:1px solid var(--line);border-radius:7px;height:1.9rem;display:grid;place-items:center}
+  .steps .body{min-width:0}
+  .steps .st{font-weight:600;display:block;margin-bottom:.15rem}
+  .steps p{margin:.1rem 0;color:var(--muted);font-size:.92rem}
+  pre{background:var(--panel-2);border:1px solid var(--line);border-radius:9px;
+    padding:.8rem .9rem;overflow-x:auto;margin:.55rem 0 0}
+  pre code{font-size:.82rem;color:var(--fg);white-space:pre}
+  .mech{background:var(--panel);border-left:3px solid var(--accent);
+    border-radius:0 9px 9px 0;padding:1rem 1.1rem}
+  .mech p{margin:.4rem 0}
+  .fix{background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:1rem 1.1rem}
+  .fix ul{margin:.3rem 0 0;padding-left:1.1rem}.fix li{margin:.3rem 0;color:var(--muted)}
+  .gate{background:var(--panel-2);border:1px dashed var(--line);border-radius:9px;padding:1rem 1.1rem}
+  .gate .q{font-family:var(--mono);font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;color:var(--warn);margin-bottom:.5rem}
+  .gate ol{margin:0;padding-left:1.2rem}.gate li{margin:.25rem 0;color:var(--fg)}
+  .masked{color:var(--muted);font-style:italic}
+
+  footer{border-top:1px solid var(--line);margin-top:2rem;padding-block:1.8rem 2.4rem}
+  footer .wrap{display:flex;flex-wrap:wrap;gap:.8rem 1.4rem;justify-content:space-between;align-items:center}
+  .links{display:flex;gap:1rem;flex-wrap:wrap;font-family:var(--mono);font-size:.85rem}
+  .foot-note{font-family:var(--mono);font-size:.74rem;color:var(--muted)}
+  @media (prefers-reduced-motion:reduce){.blink{animation:none}.card{transition:none}}
+.writeup{display:block}</style>
+</head>
+<body>
+<header class="topbar"><div class="wrap">
+  <a class="brand" href="../index.html"><span class="p">~/</span>ezequiel<span class="blink">_</span></a>
+  <nav><a href="../index.html#labs">labs</a><a href="../index.html#htb">htb</a><a href="../index.html#thm">thm</a><a href="../index.html#vulnhub">vulnhub</a><a href="../index.html#artigos">artigos</a><a href="../index.html#projetos">projetos</a><a href="../index.html#contato">contato</a></nav>
+</div></header>
+<section class="writeup" id="windows-privesc"><div class="wrap">
+  <a class="back" href="../index.html#labs">← voltar ao portfólio</a>
+  <h1>Scheduled Task hijack — pivot Linux → root no Windows</h1>
+  <div class="meta-row">
+    <span class="plat">Linux → Windows</span>
+    <span class="diff alto">ALTO</span>
+    <span class="tag">pivoting</span><span class="tag">reuso de senha</span><span class="tag">Scheduled Task</span><span class="tag">CWE-732</span>
+  </div>
+
+  <div class="wu-sec">
+    <h2>resumo</h2>
+    <p style="color:var(--muted)">Cadeia entre dois hosts: credencial de banco do GLPI num Linux é reusada numa conta Windows; acesso à estação via TeamViewer como usuário comum; privesc abusando de uma Scheduled Task que roda como Administrator apontando para um binário gravável por qualquer usuário local.</p>
+  </div>
+
+  <div class="wu-sec">
+    <h2>a cadeia</h2>
+    <ol class="steps">
+      <li><span class="num">1</span><div class="body"><span class="st">Foothold Linux + credencial do GLPI</span>
+        <p>SSH no host Linux; <code>/etc/glpi/config_db.php</code> revela a credencial de banco do GLPI (<span class="masked">mascarada</span>).</p></div></li>
+      <li><span class="num">2</span><div class="body"><span class="st">Reuso de senha → Windows</span>
+        <p>A mesma senha funciona na conta Windows <code>suporte</code>. Tentativa de PrintNightmare foi <b>descartada</b> (<code>STATUS_PASSWORD_EXPIRED</code> + <code>RestrictAnonymous</code> bloqueando troca via SAMR) — mitigação real do alvo, não limite de ferramenta.</p></div></li>
+      <li><span class="num">3</span><div class="body"><span class="st">Acesso à estação via TeamViewer</span>
+        <p>Porta 5938 aberta na LAN; login como <code>suporte</code> (usuário não-admin). Exploit público de TeamViewer 11 checado e descartado (versão do alvo diferente).</p></div></li>
+      <li><span class="num">4</span><div class="body"><span class="st">Enumeração → Scheduled Task vulnerável</span>
+        <pre><code>schtasks /query /fo LIST /v
+# Task \Backup → executa como: Administrator
+#   binário: C:\Suporte - Tarefas\Backup\tftpd64.exe
+icacls "C:\Suporte - Tarefas\Backup\tftpd64.exe"
+# → BUILTIN\Usuários:(I)(F)   ← Full Control p/ qualquer usuário</code></pre></div></li>
+      <li><span class="num">5</span><div class="body"><span class="st">Hijack do binário → execução como Administrator</span>
+        <p>Sobrescreve o <code>.exe</code> pelo payload. Armadilha: a instância TFTP de longa duração travou o disparo — resolver com <code>/end</code> antes do <code>/run</code>:</p>
+        <pre><code>schtasks /end /tn "\Backup"
+schtasks /run /tn "\Backup"   # agora dispara como Administrator</code></pre></div></li>
+    </ol>
+  </div>
+
+  <div class="wu-sec">
+    <h2>mecanismo — por que funciona</h2>
+    <div class="mech">
+      <p>O serviço <b>Schedule</b> roda como SYSTEM e <em>impersona</em> o token do usuário configurado na task (Administrator) ao lançar o processo. Ele não revalida se o binário no path continua confiável — executa o que estiver lá. <code>Full Control</code> inclui <code>WRITE_DAC</code>/<code>DELETE</code>, então o binário inteiro pode ser substituído.</p>
+      <p>É a mesma família de <b>unquoted service path</b> e <b>DLL hijacking</b>: um processo de alto privilégio confia em um recurso gravável por um usuário de menor privilégio (CWE-732).</p>
+    </div>
+  </div>
+
+  <div class="wu-sec">
+    <h2>detecção / mitigação</h2>
+    <div class="fix"><ul>
+      <li>ACL correta: o binário de uma task que roda como Administrator não pode ser gravável por <code>Users</code>.</li>
+      <li>Não reusar credenciais entre serviços e hosts; expirar e rotacionar.</li>
+      <li><b>Detecção:</b> Event ID 4698/4702 (criação/alteração de task) e gravação em binário de task privilegiada (Sysmon Event ID 11) são sinais diretos.</li>
+    </ul></div>
+  </div>
+</div></section>
+<footer><div class="wrap">
+  <span class="foot-note">// construído para estudo de pentest · labs próprios e autorizados</span>
+  <div class="links"><a href="../index.html">topo ↑</a><span class="foot-note">DCPT → eJPT → Security+ → PenTest+ → CPTS → OSCP</span></div>
+</div></footer>
+</body>
+</html>
