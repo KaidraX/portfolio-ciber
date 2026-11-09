@@ -71,6 +71,10 @@
     .chain .flow{flex-direction:column}
     .arrow{width:100%; height:26px; transform:rotate(90deg)}
   }
+  .classes{margin-top:18px; padding-top:16px; border-top:1px solid var(--line); display:flex; flex-wrap:wrap; gap:7px; align-items:center}
+  .cls-cap{font-family:"IBM Plex Mono",monospace; font-size:.72rem; color:var(--muted); margin-right:4px}
+  .cls{font-family:"IBM Plex Mono",monospace; font-size:.74rem; color:var(--text);
+    border:1px solid var(--line); border-radius:4px; padding:3px 9px; background:var(--panel-2)}
 
   /* ---- sections ---- */
   section{padding:48px 0; border-top:1px solid var(--line)}
@@ -142,15 +146,17 @@
     </div>
 
     <div class="chain">
-      <div class="cap">// anatomia de um writeup — cada laboratório é documentado como esta cadeia</div>
+      <div class="cap">// como eu analiso cada falha — não paro no acesso, explico o porquê</div>
       <div class="flow">
-        <div class="node reveal"><div class="k">01 recon</div><div class="v">Mapear</div><div class="d">superfície, serviços, versões</div></div>
+        <div class="node reveal"><div class="k">mecanismo</div><div class="v">Por que funciona</div><div class="d">a causa-raiz, não só o comando</div></div>
         <div class="arrow" aria-hidden="true">→</div>
-        <div class="node reveal"><div class="k">02 foothold</div><div class="v">Explorar</div><div class="d">a falha e por que ela funciona</div></div>
+        <div class="node reveal"><div class="k">impacto</div><div class="v">Até onde vai</div><div class="d">a cadeia completa e o que expõe</div></div>
         <div class="arrow" aria-hidden="true">→</div>
-        <div class="node reveal"><div class="k">03 privesc</div><div class="v">Escalar</div><div class="d">de usuário a root/admin</div></div>
-        <div class="arrow" aria-hidden="true">→</div>
-        <div class="node reveal"><div class="k">04 root</div><div class="v">Quebrar</div><div class="d">o que fecharia o vetor</div></div>
+        <div class="node reveal"><div class="k">correção</div><div class="v">O que quebraria</div><div class="d">a mitigação que fecha o vetor</div></div>
+      </div>
+      <div class="classes">
+        <span class="cls-cap">classes exploradas:</span>
+        <span class="cls">SQLi</span><span class="cls">LFI</span><span class="cls">SSTI</span><span class="cls">RCE</span><span class="cls">auth bypass</span><span class="cls">privesc Linux</span><span class="cls">privesc Windows</span><span class="cls">sudo/doas</span><span class="cls">esteganografia</span><span class="cls">CWE-732</span>
       </div>
     </div>
   </section>
