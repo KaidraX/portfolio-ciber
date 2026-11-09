@@ -47,9 +47,9 @@ endereços reais) — ver [Ética](#️-ética--sanitização).
 | Linux Privilege Escalation _(em breve)_ | sudo/GTFOBins · LD_PRELOAD · cron · SUID · NFS | — |
 
 ### 🧱 Máquinas (VulnHub / HTB)
-| Lab | Status |
-|---|---|
-| VulnHub — _(Viking, em documentação)_ | 🔜 |
+| Lab | Técnicas | Writeup |
+|---|---|---|
+| VulnHub — **Vikings** | enum web · Base64 · quebra de senha (John) · esteganografia · SSH · RPyC root | [ver](writeups/maquinas/vulnhub-vikings.md) |
 
 ### 🔬 Análises de CVE (semanais)
 Mecanismo + detecção + mitigação das vulnerabilidades em destaque.
