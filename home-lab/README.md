@@ -1,8 +1,7 @@
 # Home Lab Ofensivo
 
-Laboratório pessoal para praticar **pentest** de forma segura, reproduzível e
-isolada. Documentado como projeto para o portfólio — a construção de um lab já é,
-por si, uma evidência de competência que recrutadores valorizam.
+Ambiente pessoal para praticar **pentest** de forma segura, reproduzível e
+isolada: atacante + alvos vulneráveis em rede fechada, provisionados como código.
 
 > ⚠️ **Isolamento é obrigatório.** O lab é deliberadamente vulnerável. Deve ficar
 > em **rede isolada (host-only / NAT interna)**, nunca exposto à internet nem à
@@ -74,17 +73,6 @@ montar na mão, usar _lab-as-code_:
 8. [ ] "Lab as code": versionar os scripts/compose de provisionamento aqui, para
        reconstruir o lab do zero — isso é o que transforma "montei um lab" em
        "sei automatizar infraestrutura de teste".
-
----
-
-## Por que isso entra no portfólio
-
-- **Prova de iniciativa e autonomia** — montar e isolar o lab já demonstra
-  maturidade operacional.
-- **Reprodutibilidade** — versionar a infra (lab-as-code) mostra engenharia, não
-  só "cliquei em instalar".
-- **Pipeline de evidência** — cada alvo resolvido alimenta um writeup; o conjunto
-  conta como experiência prática para quem está começando.
 
 ---
 

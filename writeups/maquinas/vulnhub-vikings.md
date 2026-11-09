@@ -1,5 +1,6 @@
 # VulnHub — Vikings: web enum → esteganografia → SSH → RPyC root
 
+> **Fonte:** [VulnHub — Vikings: 1](https://www.vulnhub.com/entry/vikings-1,741/) (máquina pública e gratuita).
 > **Tipo:** máquina de laboratório (VulnHub), black-box.
 > **Objetivo:** foothold (flag de usuário) e root (flag final).
 > **Writeup sanitizado** — flags e a credencial final omitidas de propósito; o foco

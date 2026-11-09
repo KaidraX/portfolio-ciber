@@ -59,8 +59,8 @@ Mecanismo + detecção + mitigação das vulnerabilidades em destaque.
 
 ## 🧪 Home Lab
 
-Projeto de laboratório ofensivo (atacante + alvos + mini-AD), estilo _lab-as-code_
-— a construção do lab já é evidência de competência.
+Laboratório ofensivo (atacante + alvos + mini-AD) em rede isolada, provisionado
+como código.
 ➡️ [`home-lab/`](home-lab/README.md)
 
 ---
