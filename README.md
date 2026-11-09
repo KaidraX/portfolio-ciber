@@ -38,13 +38,13 @@ endereços reais) — ver [Ética](#️-ética--sanitização).
 | Lab | Técnicas | Writeup |
 |---|---|---|
 | Web → Root (app de gestão) | SQLi UNION · LFI `php://filter` · reuso de credencial · sudo misconfig | [ver](writeups/web-to-root-gym-management.md) |
-| SSTI → RCE → privesc _(em breve)_ | SSTI Jinja2 · RCE · `doas` misconfig | — |
+| SSTI → RCE → doas | SSTI Jinja2 · RCE via `__globals__` · `doas` misconfig | [ver](writeups/ssti-rce-doas-root.md) |
 
 ### 🪜 Escalonamento de Privilégio
 | Lab | Técnicas | Writeup |
 |---|---|---|
-| Windows: Scheduled Task hijack _(em breve)_ | CWE-732 · scheduled task · ACL fraca | — |
-| Linux Privilege Escalation _(em breve)_ | sudo/GTFOBins · LD_PRELOAD · cron · SUID · NFS | — |
+| Windows: Scheduled Task hijack | CWE-732 · scheduled task · ACL fraca · reuso de senha | [ver](writeups/maquinas/windows-scheduled-task-hijack.md) |
+| Linux — catálogo de vetores | sudo/GTFOBins · LD_PRELOAD · cron · tar wildcard · SUID · Exim · NFS | [ver](writeups/linux-privesc-catalogo.md) |
 
 ### 🧱 Máquinas (VulnHub / HTB)
 | Lab | Técnicas | Writeup |
