@@ -3,14 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'none'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'; upgrade-insecure-requests">
+<meta name="referrer" content="no-referrer">
 <meta name="description" content="Ezequiel — portfólio de segurança ofensiva.">
 <title>FIT Healthy Center — Ezequiel</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
 <style>
-  /* Layout: console de terminal em coluna única — hero com prompt, trilha de certs,
-     grade de writeups; cada writeup é uma "view" roteada por hash. Tema único dark. */
+  
   :root{
     --bg:#0a0e0d;
     --panel:#111917;
@@ -18,10 +19,10 @@
     --fg:#cad7d0;
     --muted:#72857c;
     --line:#1d2a27;
-    --accent:#36d07f;      /* verde terminal */
-    --cyan:#49c3e6;        /* links / tags */
-    --crit:#ff5f6e;        /* crítico */
-    --warn:#f0b24a;        /* alto/médio */
+    --accent:#36d07f;      
+    --cyan:#49c3e6;        
+    --crit:#ff5f6e;        
+    --warn:#f0b24a;        
     --mono:'JetBrains Mono',ui-monospace,'SF Mono',Menlo,Consolas,monospace;
     --sans:'IBM Plex Sans',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
     color-scheme:dark;
@@ -44,7 +45,6 @@
   h1,h2,h3{text-wrap:balance;line-height:1.2;margin:0}
   :focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:4px}
 
-  /* top bar */
   .topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;
     background:rgba(10,14,13,.86);backdrop-filter:blur(8px);
     border-bottom:1px solid var(--line);}
@@ -60,7 +60,6 @@
   .topbar nav a{color:var(--muted);padding:.3rem .55rem;border-radius:6px}
   .topbar nav a:hover{color:var(--accent);background:var(--panel);text-decoration:none}
 
-  /* hero terminal */
   .hero{padding-block:2.4rem 1rem}
   .term{background:var(--panel);border:1px solid var(--line);border-radius:12px;
     overflow:hidden;box-shadow:0 20px 50px -30px rgba(0,0,0,.8)}
@@ -85,7 +84,6 @@
   h2.title{font-size:1.5rem;font-weight:600;margin-bottom:.4rem}
   .lead{color:var(--muted);max-width:62ch;margin-bottom:1.3rem}
 
-  /* trilha */
   .trilha{display:flex;flex-wrap:wrap;gap:.55rem;align-items:stretch}
   .cert{flex:1 1 8.5rem;min-width:8.5rem;background:var(--panel);border:1px solid var(--line);
     border-radius:10px;padding:.8rem .85rem;display:flex;flex-direction:column;gap:.35rem}
@@ -96,7 +94,6 @@
   .cert .s.plan{color:var(--muted)}
   .arrow{align-self:center;color:var(--muted);font-family:var(--mono)}
 
-  /* writeups grid */
   .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(16.5rem,1fr));gap:1rem}
   .card{display:flex;flex-direction:column;gap:.6rem;background:var(--panel);
     border:1px solid var(--line);border-radius:12px;padding:1.1rem;min-width:0;
@@ -115,7 +112,6 @@
     border-radius:6px;padding:.1rem .4rem}
   .card .go{font-family:var(--mono);font-size:.8rem;color:var(--accent)}
 
-  /* platform / section heads + empty states */
   .plat-head{display:flex;align-items:baseline;gap:.7rem;flex-wrap:wrap;margin-bottom:.9rem}
   .plat-head .eyebrow{margin-bottom:0}
   .count{font-family:var(--mono);font-size:.72rem;color:var(--muted);
@@ -124,7 +120,6 @@
     color:var(--muted);font-family:var(--mono);font-size:.86rem;background:var(--panel-2);line-height:1.7}
   .empty b{color:var(--fg);font-weight:600}
 
-  /* writeup view */
   .writeup{display:none;padding-top:1.6rem}
   .writeup h1{font-size:1.65rem;font-weight:700;margin-bottom:.5rem}
   .writeup h1:focus{outline:none}
