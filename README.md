@@ -11,6 +11,8 @@
 > projetos de home lab e análises técnicas. Conduzido exclusivamente em ambientes
 > **autorizados** (plataformas de treinamento, VMs próprias), com fins educacionais.
 
+🔗 **Site:** https://ezequielpentest.github.io/portfolio-ciber/
+
 ---
 
 ## 👤 Sobre

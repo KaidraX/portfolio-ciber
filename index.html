@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ezequiel Amorim — Segurança Ofensiva</title>
+<meta name="description" content="Portfólio de pentest: exploração de aplicações web, escalonamento de privilégio e relatório técnico. Writeups de laboratórios, home lab e análises de CVE.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0E131B;         /* fundo grafite azulado */
+    --panel:#141B26;       /* blocos */
+    --panel-2:#1A2230;
+    --line:#273142;        /* bordas finas */
+    --text:#E8EDF4;        /* texto principal */
+    --muted:#93A1B5;       /* texto secundário */
+    --signal:#F2A541;      /* acento âmbar (usar com parcimônia) */
+    --signal-dim:#C98A36;
+    --crit:#E5484D; --high:#F76808; --med:#E0B341; --low:#5EB0EF;
+    --maxw:1080px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:var(--ink); color:var(--text);
+    font-family:"Space Grotesk",system-ui,sans-serif;
+    line-height:1.55; -webkit-font-smoothing:antialiased;
+  }
+  a{color:inherit}
+  code,.mono{font-family:"IBM Plex Mono",ui-monospace,monospace}
+  .wrap{max-width:var(--maxw); margin:0 auto; padding:0 24px}
+  :focus-visible{outline:2px solid var(--signal); outline-offset:3px; border-radius:2px}
+
+  /* ---- topbar ---- */
+  header.bar{position:sticky; top:0; z-index:10; background:rgba(14,19,27,.82);
+    backdrop-filter:blur(8px); border-bottom:1px solid var(--line)}
+  .bar .wrap{display:flex; align-items:center; justify-content:space-between; height:60px}
+  .brand{font-weight:600; letter-spacing:.2px}
+  .brand .tag{color:var(--signal)}
+  nav.links a{color:var(--muted); text-decoration:none; margin-left:22px; font-size:.92rem}
+  nav.links a:hover{color:var(--text)}
+  @media(max-width:620px){ nav.links a{margin-left:14px; font-size:.84rem} .brand{font-size:.95rem} }
+
+  /* ---- hero ---- */
+  .hero{padding:72px 0 40px}
+  .hero h1{font-size:clamp(2.1rem,6vw,3.5rem); line-height:1.05; margin:0 0 14px; font-weight:700; letter-spacing:-.5px}
+  .hero .role{font-size:clamp(1.05rem,2.6vw,1.3rem); color:var(--text); max-width:40ch; margin:0 0 10px}
+  .hero .certs{color:var(--muted); font-size:.95rem; margin:0 0 30px}
+  .hero .certs .mono{color:var(--signal-dim)}
+  .cta{display:flex; gap:12px; flex-wrap:wrap}
+  .btn{display:inline-block; text-decoration:none; padding:11px 18px; border-radius:6px; font-weight:500; font-size:.95rem}
+  .btn.primary{background:var(--signal); color:#201603}
+  .btn.primary:hover{background:#ffbb57}
+  .btn.ghost{border:1px solid var(--line); color:var(--text)}
+  .btn.ghost:hover{border-color:var(--signal); color:var(--signal)}
+
+  /* ---- chain (elemento-assinatura) ---- */
+  .chain{margin:44px 0 8px; padding:22px; border:1px solid var(--line); border-radius:10px;
+    background:linear-gradient(180deg,var(--panel),var(--ink));}
+  .chain .cap{font-family:"IBM Plex Mono",monospace; font-size:.72rem; color:var(--muted); margin-bottom:14px}
+  .chain .flow{display:flex; align-items:stretch; gap:0; flex-wrap:wrap}
+  .node{flex:1 1 150px; min-width:140px; border:1px solid var(--line); border-radius:8px;
+    background:var(--panel-2); padding:14px 16px; position:relative}
+  .node .k{font-family:"IBM Plex Mono",monospace; font-size:.72rem; color:var(--signal)}
+  .node .v{font-weight:600; margin-top:3px}
+  .node .d{color:var(--muted); font-size:.82rem; margin-top:4px}
+  .arrow{display:flex; align-items:center; justify-content:center; width:34px; color:var(--signal); font-family:"IBM Plex Mono",monospace; flex:0 0 34px}
+  @media(max-width:720px){
+    .chain .flow{flex-direction:column}
+    .arrow{width:100%; height:26px; transform:rotate(90deg)}
+  }
+
+  /* ---- sections ---- */
+  section{padding:48px 0; border-top:1px solid var(--line)}
+  .h2{display:flex; align-items:baseline; gap:12px; margin:0 0 22px}
+  .h2 h2{font-size:1.5rem; margin:0; font-weight:600}
+  .h2 .idx{font-family:"IBM Plex Mono",monospace; color:var(--signal-dim); font-size:.8rem}
+  .lead{color:var(--muted); max-width:62ch; margin:-8px 0 26px}
+
+  .cat{font-family:"IBM Plex Mono",monospace; color:var(--muted); font-size:.8rem; margin:26px 0 10px}
+  .cat:first-of-type{margin-top:0}
+
+  .entry{display:block; text-decoration:none; color:inherit; border:1px solid var(--line);
+    border-left:3px solid var(--line); border-radius:8px; padding:16px 18px; margin-bottom:10px;
+    background:var(--panel); transition:border-color .15s ease, background .15s ease}
+  .entry:hover{border-color:var(--line); border-left-color:var(--signal); background:var(--panel-2)}
+  .entry .t{font-weight:600; font-size:1.05rem}
+  .entry .tags{margin-top:8px; display:flex; gap:7px; flex-wrap:wrap}
+  .tag{font-family:"IBM Plex Mono",monospace; font-size:.72rem; color:var(--muted);
+    border:1px solid var(--line); border-radius:999px; padding:2px 9px}
+  .chip{font-family:"IBM Plex Mono",monospace; font-size:.68rem; padding:2px 8px; border-radius:4px; font-weight:600}
+  .chip.crit{color:var(--crit); border:1px solid color-mix(in srgb,var(--crit) 45%,transparent)}
+  .chip.pub{color:var(--low); border:1px solid color-mix(in srgb,var(--low) 45%,transparent)}
+
+  .two{display:grid; grid-template-columns:1fr 1fr; gap:14px}
+  @media(max-width:720px){.two{grid-template-columns:1fr}}
+  .panel{border:1px solid var(--line); border-radius:8px; padding:20px; background:var(--panel)}
+  .panel h3{margin:0 0 6px; font-size:1.1rem}
+  .panel p{color:var(--muted); margin:0 0 14px; font-size:.92rem}
+  .panel a{color:var(--signal); text-decoration:none; font-weight:500; font-size:.92rem}
+  .panel a:hover{text-decoration:underline}
+
+  footer{border-top:1px solid var(--line); padding:34px 0 60px; color:var(--muted); font-size:.85rem}
+  footer a{color:var(--muted)}
+  footer .note{max-width:70ch; margin:0 0 14px}
+
+  /* reveal (apenas um momento orquestrado, respeitando reduced-motion) */
+  @media (prefers-reduced-motion: no-preference){
+    .reveal{opacity:0; transform:translateY(10px); animation:rise .6s ease forwards}
+    .node:nth-child(1){animation-delay:.05s} .node:nth-child(3){animation-delay:.18s}
+    .node:nth-child(5){animation-delay:.31s} .node:nth-child(7){animation-delay:.44s}
+    @keyframes rise{to{opacity:1; transform:none}}
+  }
+</style>
+</head>
+<body>
+
+<header class="bar">
+  <div class="wrap">
+    <div class="brand">ezequiel<span class="tag">.sec</span></div>
+    <nav class="links">
+      <a href="#writeups">Writeups</a>
+      <a href="#lab">Home Lab</a>
+      <a href="#cve">CVE</a>
+      <a href="https://www.linkedin.com/in/ezequiel-amorim/" target="_blank" rel="noopener">LinkedIn</a>
+      <a href="https://github.com/ezequielpentest/portfolio-ciber" target="_blank" rel="noopener">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="hero" style="border-top:none">
+    <h1>Ezequiel Amorim</h1>
+    <p class="role">Segurança ofensiva: exploração de aplicações web, escalonamento de privilégio e relatório técnico.</p>
+    <p class="certs">Trilha: <span class="mono">eJPT · Security+ · PenTest+ · HTB CPTS · OSCP</span></p>
+    <div class="cta">
+      <a class="btn primary" href="#writeups">Ver writeups</a>
+      <a class="btn ghost" href="https://www.linkedin.com/in/ezequiel-amorim/" target="_blank" rel="noopener">LinkedIn</a>
+    </div>
+
+    <div class="chain">
+      <div class="cap">// anatomia de um writeup — cada laboratório é documentado como esta cadeia</div>
+      <div class="flow">
+        <div class="node reveal"><div class="k">01 recon</div><div class="v">Mapear</div><div class="d">superfície, serviços, versões</div></div>
+        <div class="arrow" aria-hidden="true">→</div>
+        <div class="node reveal"><div class="k">02 foothold</div><div class="v">Explorar</div><div class="d">a falha e por que ela funciona</div></div>
+        <div class="arrow" aria-hidden="true">→</div>
+        <div class="node reveal"><div class="k">03 privesc</div><div class="v">Escalar</div><div class="d">de usuário a root/admin</div></div>
+        <div class="arrow" aria-hidden="true">→</div>
+        <div class="node reveal"><div class="k">04 root</div><div class="v">Quebrar</div><div class="d">o que fecharia o vetor</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="writeups">
+    <div class="h2"><span class="idx">/writeups</span><h2>Writeups</h2></div>
+    <p class="lead">Metodologia fixa: reconhecimento, exploração, o mecanismo por trás da falha e a mitigação que a elimina. Sanitizados — sem flags nem dados reais, salvo máquinas públicas.</p>
+
+    <div class="cat">// web</div>
+    <a class="entry" href="https://github.com/ezequielpentest/portfolio-ciber/blob/main/writeups/web-to-root-gym-management.md" target="_blank" rel="noopener">
+      <div class="t">Web → Root — cadeia em app de gestão</div>
+      <div class="tags"><span class="tag">SQLi UNION</span><span class="tag">LFI php://filter</span><span class="tag">reuso de credencial</span><span class="tag">sudo misconfig</span></div>
+    </a>
+    <a class="entry" href="https://github.com/ezequielpentest/portfolio-ciber/blob/main/writeups/ssti-rce-doas-root.md" target="_blank" rel="noopener">
+      <div class="t">SSTI → RCE → doas</div>
+      <div class="tags"><span class="tag">SSTI Jinja2</span><span class="tag">RCE __globals__</span><span class="tag">doas misconfig</span></div>
+    </a>
+
+    <div class="cat">// escalonamento de privilégio</div>
+    <a class="entry" href="https://github.com/ezequielpentest/portfolio-ciber/blob/main/writeups/maquinas/windows-scheduled-task-hijack.md" target="_blank" rel="noopener">
+      <div class="t">Windows — Scheduled Task hijack</div>
+      <div class="tags"><span class="tag">CWE-732</span><span class="tag">scheduled task</span><span class="tag">ACL fraca</span><span class="tag">reuso de senha</span></div>
+    </a>
+    <a class="entry" href="https://github.com/ezequielpentest/portfolio-ciber/blob/main/writeups/linux-privesc-catalogo.md" target="_blank" rel="noopener">
+      <div class="t">Linux — catálogo de vetores de privesc</div>
+      <div class="tags"><span class="tag">GTFOBins</span><span class="tag">LD_PRELOAD</span><span class="tag">cron</span><span class="tag">tar wildcard</span><span class="tag">SUID/Exim</span><span class="tag">NFS</span></div>
+    </a>
+
+    <div class="cat">// máquinas</div>
+    <a class="entry" href="https://github.com/ezequielpentest/portfolio-ciber/blob/main/writeups/maquinas/vulnhub-vikings.md" target="_blank" rel="noopener">
+      <div class="t">VulnHub — Vikings <span class="chip pub">público</span></div>
+      <div class="tags"><span class="tag">enum web</span><span class="tag">esteganografia</span><span class="tag">John</span><span class="tag">SSH</span><span class="tag">RPyC root</span></div>
+    </a>
+  </section>
+
+  <section>
+    <div class="two">
+      <div class="panel" id="lab">
+        <h3>Home Lab</h3>
+        <p>Laboratório ofensivo (atacante + alvos + mini-AD) em rede isolada, provisionado como código. Arquitetura, caminho de construção e checklist de isolamento.</p>
+        <a href="https://github.com/ezequielpentest/portfolio-ciber/blob/main/home-lab/README.md" target="_blank" rel="noopener">Abrir projeto do lab →</a>
+      </div>
+      <div class="panel" id="cve">
+        <h3>Análises de CVE</h3>
+        <p>Análises técnicas semanais de vulnerabilidades em destaque: mecanismo, detecção e mitigação. Atualizado automaticamente toda semana.</p>
+        <a href="https://github.com/ezequielpentest/portfolio-ciber/tree/main/writeups/cve-analises" target="_blank" rel="noopener">Ver análises →</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <p class="note">Todo o conteúdo foi produzido em ambientes autorizados (plataformas de treinamento e VMs próprias), com fins educacionais. Nada aqui deve ser usado contra sistemas sem autorização por escrito.</p>
+    <div>Ezequiel Amorim · <a href="https://www.linkedin.com/in/ezequiel-amorim/" target="_blank" rel="noopener">LinkedIn</a> · <a href="https://github.com/ezequielpentest/portfolio-ciber" target="_blank" rel="noopener">GitHub</a></div>
+  </div>
+</footer>
+
+</body>
+</html>
