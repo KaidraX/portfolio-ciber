@@ -15,16 +15,14 @@
 
 ## 👤 Sobre
 
-Em transição para **segurança ofensiva (pentest)**, com foco em **aplicações web**,
-**escalonamento de privilégio** (Linux e Windows) e **documentação técnica** no
-padrão de relatório profissional. Cada laboratório vira um writeup estruturado:
-não só *o que* foi explorado, mas **por que o mecanismo funciona** e **o que
-quebraria o exploit**.
+Segurança ofensiva (pentest) com foco em **aplicações web** e **escalonamento de
+privilégio** (Linux e Windows). Cada laboratório vira um writeup estruturado — não
+só *o que* foi explorado, mas **por que o mecanismo funciona** e **o que quebraria
+o exploit** —, no padrão de relatório profissional.
 
 **Trilha de certificações:** eJPT → CompTIA Security+ → CompTIA PenTest+ → HTB CPTS → OSCP
-**Objetivo:** pentester profissional (Brasil → Europa)
 
-📫 **Contato:** LinkedIn _(adicione)_ · e-mail _(adicione)_
+📫 [**LinkedIn**](https://www.linkedin.com/in/ezequiel-amorim/)
 
 ---
 
