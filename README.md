@@ -51,6 +51,10 @@ endereços reais) — ver [Ética](#️-ética--sanitização).
 |---|---|
 | VulnHub — _(Viking, em documentação)_ | 🔜 |
 
+### 🔬 Análises de CVE (semanais)
+Mecanismo + detecção + mitigação das vulnerabilidades em destaque.
+➡️ [`writeups/cve-analises/`](writeups/cve-analises/README.md)
+
 ---
 
 ## 🧪 Home Lab
