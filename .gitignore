@@ -1,0 +1,17 @@
+# Nunca versionar segredos ou material sensível de lab
+*.env
+*.pem
+*.key
+*_key
+*_rsa
+*.ovpn
+creds*.txt
+loot/
+raw-notes/        # anotações cruas NÃO sanitizadas ficam fora do repo
+
+# Sistema / editores
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp

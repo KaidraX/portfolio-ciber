@@ -1,0 +1,6 @@
+# GitHub Pages — tema do site do portfólio.
+# Para publicar: Settings ▸ Pages ▸ Source = "Deploy from a branch" ▸ main / (root).
+# O site sai em https://ezequielpentest.github.io/portfolio-ciber/
+title: Ezequiel Amorim — Segurança Ofensiva
+description: Portfólio de pentest — writeups, home lab e análises técnicas.
+theme: jekyll-theme-cayman
