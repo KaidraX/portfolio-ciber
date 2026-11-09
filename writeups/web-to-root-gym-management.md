@@ -160,10 +160,3 @@ vira crítica combinada com o arquivo gravável.
 | 3 | Credencial hard-coded | CWE-798 |
 | 5 | Privilégio excessivo + arquivo gravável | CWE-250 / CWE-732 |
 
-## Portão de validação (autoteste)
-
-- **Classe de cada falha?** ✔ (tabela acima)
-- **Por que o mecanismo funciona?** ✔ (destaque: Apache relê config como root
-  antes do *drop* de privilégio)
-- **O que quebraria o exploit?** ✔ (prepared statements, hashing, whitelist
-  fechada, segredos por serviço, config não-gravável)

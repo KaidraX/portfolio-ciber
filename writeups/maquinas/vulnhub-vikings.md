@@ -94,7 +94,8 @@ meio do arquivo. **Classe:** CWE-521 (senha fraca) + CWE-312/CWE-522 (segredo
 ```bash
 ssh <usuario>@<alvo>
 ```
-Login interativo como o usuário (Ubuntu 18.04). **Flag de usuário obtida.**
+Login interativo como o usuário (Ubuntu 18.04). **Flag de usuário**
+(`/home/ragnar/user.txt`): `4bf930187d0149a9e4374a4e823f867d`.
 **Classe:** CWE-522 — credencial vazada reutilizada para acesso.
 
 ## 6. Privesc — RPyC como root, sem autenticação
@@ -119,7 +120,7 @@ chmod +x /tmp/py
    comando** — então a cópia do interpretador fica executável pelo próprio
    usuário, driblando a permissão restritiva do binário original.
 
-**Flag de root obtida** em `/root/root.txt`.
+**Flag de root** (`/root/root.txt`): `f0b98d4387ff6da77317e582da98bf31`.
 
 ---
 
@@ -133,14 +134,6 @@ chmod +x /tmp/py
 | Médio | Dados sensíveis em Base64 | CWE-200 | Não expor dados no webroot; Base64 = texto claro |
 | Baixo | Arquivos/dirs expostos | CWE-548 | Desabilitar listagem; remover arquivos órfãos |
 | Info | SSH/HTTP expostos | — | Firewall; SSH restrito a rede confiável; manter atualizado |
-
-## 🎯 Portão de validação
-
-- **(a) Classe de cada falha?** ✔ (tabela acima)
-- **(b) Por que o mecanismo funciona?** ✔ — destaques: Base64 é reversível; ZIP
-  concatenado a um JPEG; `cp` transfere ownership; RPyC sem auth como root = RCE.
-- **(c) O que quebraria o exploit?** ✔ — autenticação no RPyC + privilégio mínimo
-  mata a privesc; não esconder credencial em imagem mata a cadeia de acesso.
 
 ## 🧰 Ferramentas
 
