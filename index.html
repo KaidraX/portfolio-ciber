@@ -268,8 +268,9 @@
     <section class="block" id="artigos">
       <div class="plat-head"><div class="eyebrow">artigos</div><span class="count">1 artigo</span></div>
       <h2 class="title">Conceitos &amp; cheatsheets</h2>
-      <p class="lead">Notas técnicas sobre classes de vulnerabilidade — o mecanismo por trás da falha, além dos writeups de máquina.</p>
+      <p class="lead">Notas técnicas por classe de vulnerabilidade e comentários sobre CVEs em destaque — o mecanismo por trás da falha, detecção e mitigação.</p>
       <div class="grid">
+        <!-- [[CVE_CARD_INSERT]] -->
         <a class="card" href="artigos/linux-privesc.html">
           <div class="top"><span class="plat">cheatsheet</span><span class="diff estudo">TÉCNICAS</span></div>
           <h3>Arsenal de Linux PrivEsc</h3>
@@ -281,8 +282,16 @@
     </section>
 
     <section class="block" id="projetos">
-      <div class="plat-head"><div class="eyebrow">projetos</div><span class="count">em breve</span></div>
-      <div class="empty">Ferramentas e scripts próprios (automação de recon, PoCs didáticos, utilitários) entram aqui, com link para o repositório e o que cada um resolve.</div>
+      <div class="plat-head"><div class="eyebrow">projetos</div><span class="count">1 projeto</span></div>
+      <div class="grid">
+        <a class="card" href="home-lab/">
+          <div class="top"><span class="plat">lab-as-code</span><span class="diff estudo">INFRA</span></div>
+          <h3>Home Lab Ofensivo</h3>
+          <p>Laboratório de pentest em rede isolada: atacante + alvos vulneráveis + mini-AD (GOAD), provisionado como código. Arquitetura, caminho de construção e checklist de isolamento.</p>
+          <div class="tags"><span class="tag">VirtualBox</span><span class="tag">Kali</span><span class="tag">AD/GOAD</span><span class="tag">rede isolada</span></div>
+          <span class="go">ver projeto →</span>
+        </a>
+      </div>
     </section>
 
     <section class="block" id="contato">
