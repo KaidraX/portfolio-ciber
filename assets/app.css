@@ -136,8 +136,8 @@ strong,b{color:var(--fg)}
 .banner{margin:6px 0 22px;text-align:center}
 .banner svg{display:block;width:100%;max-width:560px;height:auto}
 .banner figcaption{font-family:var(--mono);font-size:.72rem;color:var(--soft);margin-top:10px;letter-spacing:.04em;text-align:center}
-.banner-img{display:block;height:auto;max-height:440px;width:auto;margin:0 auto;filter:invert(1)}
-:root[data-theme="light"] .banner-img{filter:none}
+.banner-img{display:block;height:auto;max-height:440px;width:auto;margin:0 auto;padding:30px 50px;
+  background:radial-gradient(ellipse 58% 62% at 50% 47%, rgba(248,249,251,.97) 0%, rgba(248,249,251,.9) 40%, rgba(248,249,251,0) 72%)}
 .banner .bnr-hex{fill:var(--accent-soft);stroke:var(--accent);stroke-width:2.5}
 .banner .bnr-fg{fill:var(--fg)}
 .banner .bnr-ac{fill:var(--accent)}
