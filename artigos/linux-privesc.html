@@ -3,33 +3,35 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'none'; style-src 'self'; font-src 'self'; img-src 'self' data:; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'; upgrade-insecure-requests">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data:; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'; upgrade-insecure-requests">
 <meta name="referrer" content="no-referrer">
 <meta name="description" content="Kaidra — portfólio de segurança ofensiva.">
 <title>Arsenal de Linux PrivEsc — Kaidra</title>
 <link rel="stylesheet" href="../assets/app.css">
+<script src="../assets/theme.js"></script>
 </head>
 <body>
 <input type="checkbox" id="nt" class="nav-toggle">
 <label for="nt" class="nav-burger"><span class="mk">K</span> Menu</label>
 <div class="layout">
 <aside class="sidebar">
-<a class="sb-brand" href="../index.html"><span class="mark">K</span>Kaidra<span class="tag">.sec</span></a>
+<a class="sb-brand" href="../index.html"><span class="mark">K</span>Kaidra<span class="tag">X</span></a>
 <div class="sb-sub">Segurança ofensiva</div>
+<button type="button" id="themeToggle" class="theme-toggle" aria-label="Alternar tema"><span class="tt-ico tt-to-light">☀</span><span class="tt-ico tt-to-dark">☾</span><span class="tt-lbl tt-to-light">Tema claro</span><span class="tt-lbl tt-to-dark">Tema escuro</span></button>
 <nav class="sb-nav">
-<a href="../index.html">Início</a>
-<div class="sb-group">HackTheBox</div>
-<a href="../writeups/htb-unclaimed.html">Unclaimed</a>
-<a href="../writeups/htb-eureka.html">Eureka</a>
-<div class="sb-group">VulnHub</div>
-<a href="../writeups/vulnhub-napping.html">Napping</a>
-<a href="../writeups/vikings.html">Vikings</a>
-<div class="sb-group">Labs</div>
+<a href="../index.html">LEIA-ME</a>
+<div class="sb-group">Certificações e notas</div>
+<a href="../certificacoes/roteiro.html">Roteiro: virar pentester / red team</a>
+<a href="../artigos/linux-privesc.html" class="active">Arsenal de Linux PrivEsc</a>
+<div class="sb-group">Relatórios</div>
+<a href="../writeups/htb-unclaimed.html">HTB — Unclaimed</a>
+<a href="../writeups/htb-eureka.html">HTB — Eureka</a>
+<a href="../writeups/vulnhub-napping.html">VulnHub — Napping</a>
+<a href="../writeups/vikings.html">VulnHub — Vikings</a>
+<div class="sb-group">Máquinas / Labs</div>
 <a href="../writeups/fit-healthy.html">FIT Healthy</a>
 <a href="../writeups/cartao-seguro.html">Cartão Seguro</a>
 <a href="../writeups/windows-privesc.html">Windows: Scheduled Task</a>
-<div class="sb-group">Artigos / Blog</div>
-<a href="../artigos/linux-privesc.html" class="active">Arsenal Linux PrivEsc</a>
 <div class="sb-group">Projetos</div>
 <a href="../home-lab/index.html">Home Lab</a>
 </nav>

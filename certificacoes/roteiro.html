@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data:; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'; upgrade-insecure-requests">
+<meta name="referrer" content="no-referrer">
+<meta name="description" content="Roteiro de estudo de Kaidra: de iniciante a pentester e red team — domínios, fontes e habilidades.">
+<title>Roteiro para pentester / red team — KaidraX</title>
+<link rel="stylesheet" href="../assets/app.css">
+<script src="../assets/theme.js"></script>
+</head>
+<body>
+<input type="checkbox" id="nt" class="nav-toggle">
+<label for="nt" class="nav-burger"><span class="mk">K</span> Menu</label>
+<div class="layout">
+<aside class="sidebar">
+<a class="sb-brand" href="../index.html"><span class="mark">K</span>Kaidra<span class="tag">X</span></a>
+<div class="sb-sub">Segurança ofensiva</div>
+<button type="button" id="themeToggle" class="theme-toggle" aria-label="Alternar tema"><span class="tt-ico tt-to-light">☀</span><span class="tt-ico tt-to-dark">☾</span><span class="tt-lbl tt-to-light">Tema claro</span><span class="tt-lbl tt-to-dark">Tema escuro</span></button>
+<nav class="sb-nav">
+<a href="../index.html">LEIA-ME</a>
+<div class="sb-group">Certificações e notas</div>
+<a href="../certificacoes/roteiro.html" class="active">Roteiro: virar pentester / red team</a>
+<a href="../artigos/linux-privesc.html">Arsenal de Linux PrivEsc</a>
+<div class="sb-group">Relatórios</div>
+<a href="../writeups/htb-unclaimed.html">HTB — Unclaimed</a>
+<a href="../writeups/htb-eureka.html">HTB — Eureka</a>
+<a href="../writeups/vulnhub-napping.html">VulnHub — Napping</a>
+<a href="../writeups/vikings.html">VulnHub — Vikings</a>
+<div class="sb-group">Máquinas / Labs</div>
+<a href="../writeups/fit-healthy.html">FIT Healthy</a>
+<a href="../writeups/cartao-seguro.html">Cartão Seguro</a>
+<a href="../writeups/windows-privesc.html">Windows: Scheduled Task</a>
+<div class="sb-group">Projetos</div>
+<a href="../home-lab/index.html">Home Lab</a>
+</nav>
+<div class="sb-foot">Material de estudo · labs autorizados · <a href="../index.html#contato">contato</a></div>
+</aside>
+<main class="content">
+
+  <a class="back" href="../index.html">← voltar ao LEIA-ME</a>
+
+  <section class="hero" id="top">
+    <div class="eyebrow">certificações e notas</div>
+    <h1>Roteiro: de iniciante a pentester / red team</h1>
+    <p class="lead-big">O caminho que estou seguindo de verdade — não uma lista de desejos. Separa os domínios por área, aponta onde estudei cada coisa e termina com um checklist honesto de habilidades: o que já demonstrei nos writeups e o que ainda está em construção.</p>
+  </section>
+
+  <section class="block" id="trilha">
+    <div class="eyebrow">trilha de certificações</div>
+    <h2 class="title">Do fundamento ao OSCP</h2>
+    <p class="lead">A base prática (home labs, CTFs e os writeups deste site) corre em paralelo com a teoria. Certificação valida o que a prática já construiu — não o contrário.</p>
+    <div class="trilha">
+      <span class="step">DCPT · base (Desec)</span>
+      <span class="step on">eJPT · em progresso</span>
+      <span class="step">Security+</span>
+      <span class="step">PenTest+</span>
+      <span class="step">CPTS</span>
+      <span class="step">OSCP · objetivo</span>
+    </div>
+  </section>
+
+  <section class="block" id="como">
+    <div class="eyebrow">como usar este roteiro</div>
+    <h2 class="title">Cinco regras que mudaram meu ritmo</h2>
+    <ul class="rm-advice">
+      <li>Esgote o conteúdo gratuito e a prática antes de pagar certificação cara. PortSwigger, OverTheWire e boa parte de HTB/THM cobrem o essencial sem custo.</li>
+      <li>Não pule fundamento — rede (TCP/IP, DNS, HTTP), Linux e linha de comando. É aí que a maioria trava no exame prático, não na "técnica mágica".</li>
+      <li>Consistência vence intensidade: 1–2h por dia, todo dia, rende mais que maratona de fim de semana. O cérebro consolida no intervalo.</li>
+      <li>Documente tudo num segundo cérebro. O que você não anota, você reaprende do zero daqui a um mês. Cada máquina resolvida vira writeup.</li>
+      <li>Entre numa comunidade e resolva junto. Explicar o ataque para outra pessoa expõe o que você só achava que entendia.</li>
+    </ul>
+  </section>
+
+  <section class="block" id="dominios">
+    <div class="eyebrow">domínios de estudo</div>
+    <h2 class="title">Por área — e onde estudei cada uma</h2>
+
+    <div class="dom">
+      <div class="d-top"><h3>Pentest de rede &amp; host</h3><span class="d-note">base · o maior bloco</span></div>
+      <p class="lead">Enumeração, serviços expostos, exploração de serviço e o acesso inicial. É o tronco de onde tudo o resto deriva.</p>
+      <ul class="src-list">
+        <li class="src"><b>Desec</b> DCPT (base em português)</li>
+        <li class="src"><b>HackTheBox</b> máquinas + Academy</li>
+        <li class="src"><b>TryHackMe</b> trilhas guiadas</li>
+        <li class="src"><b>Pwn.College</b> fundamentos de sistema</li>
+        <li class="src"><b>OverTheWire</b> Bandit → shell/Linux</li>
+        <li class="src"><b>OSCP/PWK</b> metodologia (objetivo)</li>
+      </ul>
+    </div>
+
+    <div class="dom">
+      <div class="d-top"><h3>Pentest web</h3><span class="d-note">AppSec</span></div>
+      <p class="lead">SQLi, LFI, SSTI, upload, auth bypass, SSRF. Onde mais aparece bug bounty e onde mais pratiquei até agora.</p>
+      <ul class="src-list">
+        <li class="src"><b>PortSwigger</b> Web Security Academy</li>
+        <li class="src"><b>ExploitMind</b> labs guiados</li>
+        <li class="src"><b>TryHackMe</b> OWASP / web</li>
+        <li class="src"><b>HackTheBox</b> máquinas web</li>
+      </ul>
+    </div>
+
+    <div class="dom">
+      <div class="d-top"><h3>Escalada de privilégio</h3><span class="d-note">Linux &amp; Windows</span></div>
+      <p class="lead">Do shell de usuário ao root/SYSTEM: sudo, SUID, cron, tasks agendadas, tokens e privilégios. É o que fecha quase todo writeup aqui.</p>
+      <ul class="src-list">
+        <li class="src"><b>TryHackMe</b> trilhas de privesc</li>
+        <li class="src"><b>HackTheBox</b> máquinas Linux/Windows</li>
+        <li class="src"><b>GTFOBins / LOLBAS</b> referência</li>
+        <li class="src"><b>Labs próprios</b> no home lab</li>
+      </ul>
+    </div>
+
+    <div class="dom">
+      <div class="d-top"><h3>Active Directory &amp; red team</h3><span class="d-note">em construção</span></div>
+      <p class="lead">Kerberoasting, AS-REP, delegações, movimento lateral e C2. O próximo salto, montado no mini-AD do home lab (GOAD).</p>
+      <ul class="src-list">
+        <li class="src"><b>HackTheBox</b> ProLabs / Dante</li>
+        <li class="src"><b>TryHackMe</b> trilha de AD</li>
+        <li class="src"><b>Home lab</b> GOAD próprio</li>
+      </ul>
+    </div>
+
+    <div class="dom">
+      <div class="d-top"><h3>Frameworks &amp; metodologia</h3><span class="d-note">referência</span></div>
+      <p class="lead">O mapa que organiza tudo acima e padroniza o relatório.</p>
+      <ul class="src-list">
+        <li class="src"><b>MITRE ATT&amp;CK</b> táticas e técnicas</li>
+        <li class="src"><b>OWASP</b> WSTG / Top 10</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="block" id="plataformas">
+    <div class="plat-head"><div class="eyebrow">plataformas de prática</div><span class="count">onde eu treino</span></div>
+    <div class="plat-grid">
+      <div class="p"><b>HackTheBox</b><span>Máquinas e Academy — do foothold ao root.</span></div>
+      <div class="p"><b>TryHackMe</b><span>Trilhas guiadas, boas para fundamento.</span></div>
+      <div class="p"><b>PortSwigger</b><span>Web Security Academy — web, de graça.</span></div>
+      <div class="p"><b>ExploitMind</b><span>Labs guiados de exploração.</span></div>
+      <div class="p"><b>Pwn.College</b><span>Fundamentos de sistema e binário.</span></div>
+      <div class="p"><b>OverTheWire</b><span>Wargames — shell, Linux, cripto.</span></div>
+      <div class="p"><b>VulnHub</b><span>VMs offline para montar no lab.</span></div>
+      <div class="p"><b>Desec</b><span>Base em português (DCPT).</span></div>
+    </div>
+  </section>
+
+  <section class="block" id="habilidades">
+    <div class="eyebrow">checklist</div>
+    <h2 class="title">Habilidades a desenvolver</h2>
+    <p class="lead">Marcadas as que já demonstrei em writeups deste site; em aberto as que ainda estou construindo. Revisado conforme avanço.</p>
+    <ul class="checklist">
+      <li class="done">Recon e enumeração (nmap, ffuf/gobuster, enum de serviços)</li>
+      <li class="done">Exploração web: SQLi (UNION e cego), LFI, SSTI → RCE</li>
+      <li class="done">Bypass de autenticação e reuso de credenciais</li>
+      <li class="done">Escalada de privilégio Linux (sudo, SUID, cron, doas, GTFOBins)</li>
+      <li class="done">Escalada de privilégio Windows (scheduled task, SeBackupPrivilege)</li>
+      <li class="done">Abuso de MSSQL (impersonation, xp_cmdshell)</li>
+      <li class="done">Prompt injection em aplicação com LLM</li>
+      <li class="done">Cracking de senha (hashcat / john) e esteganografia</li>
+      <li class="done">Pivoting básico entre hosts</li>
+      <li class="done">Relatório técnico (cadeia, mecanismo, correção)</li>
+      <li class="todo">Active Directory: Kerberoasting, AS-REP, delegações, ADCS
+        <ul>
+          <li class="todo">BloodHound · Impacket · Certipy</li>
+        </ul>
+      </li>
+      <li class="todo">Command &amp; Control (C2)
+        <ul>
+          <li class="todo">Sliver · Havoc</li>
+        </ul>
+      </li>
+      <li class="todo">Pivoting e tunelamento avançado (chisel, ligolo)</li>
+      <li class="todo">Pentest de cloud (AWS / Azure)</li>
+      <li class="todo">Pentest Wi-Fi</li>
+      <li class="todo">Desenvolvimento e adaptação de exploits (estilo OSCP)</li>
+      <li class="todo">Evasão de AV / EDR</li>
+    </ul>
+  </section>
+
+  <footer>
+    <span class="foot-note">// roteiro vivo · revisado conforme eu avanço · tudo em labs próprios e autorizados</span>
+    <div class="links"><a href="../index.html">topo ↑</a><a href="https://github.com/KaidraX">github</a></div>
+  </footer>
+
+</main>
+</div>
+</body>
+</html>

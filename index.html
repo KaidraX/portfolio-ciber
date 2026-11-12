@@ -3,33 +3,35 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'none'; style-src 'self'; font-src 'self'; img-src 'self' data:; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'; upgrade-insecure-requests">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data:; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'; upgrade-insecure-requests">
 <meta name="referrer" content="no-referrer">
 <meta name="description" content="Kaidra — notas e writeups de segurança ofensiva.">
 <title>Kaidra — Segurança Ofensiva</title>
 <link rel="stylesheet" href="assets/app.css">
+<script src="assets/theme.js"></script>
 </head>
 <body>
 <input type="checkbox" id="nt" class="nav-toggle">
 <label for="nt" class="nav-burger"><span class="mk">K</span> Menu</label>
 <div class="layout">
 <aside class="sidebar">
-<a class="sb-brand" href="index.html"><span class="mark">K</span>Kaidra<span class="tag">.sec</span></a>
+<a class="sb-brand" href="index.html"><span class="mark">K</span>Kaidra<span class="tag">X</span></a>
 <div class="sb-sub">Segurança ofensiva</div>
+<button type="button" id="themeToggle" class="theme-toggle" aria-label="Alternar tema"><span class="tt-ico tt-to-light">☀</span><span class="tt-ico tt-to-dark">☾</span><span class="tt-lbl tt-to-light">Tema claro</span><span class="tt-lbl tt-to-dark">Tema escuro</span></button>
 <nav class="sb-nav">
-<a href="index.html" class="active">Início</a>
-<div class="sb-group">HackTheBox</div>
-<a href="writeups/htb-unclaimed.html">Unclaimed</a>
-<a href="writeups/htb-eureka.html">Eureka</a>
-<div class="sb-group">VulnHub</div>
-<a href="writeups/vulnhub-napping.html">Napping</a>
-<a href="writeups/vikings.html">Vikings</a>
-<div class="sb-group">Labs</div>
+<a href="index.html" class="active">LEIA-ME</a>
+<div class="sb-group">Certificações e notas</div>
+<a href="certificacoes/roteiro.html">Roteiro: virar pentester / red team</a>
+<a href="artigos/linux-privesc.html">Arsenal de Linux PrivEsc</a>
+<div class="sb-group">Relatórios</div>
+<a href="writeups/htb-unclaimed.html">HTB — Unclaimed</a>
+<a href="writeups/htb-eureka.html">HTB — Eureka</a>
+<a href="writeups/vulnhub-napping.html">VulnHub — Napping</a>
+<a href="writeups/vikings.html">VulnHub — Vikings</a>
+<div class="sb-group">Máquinas / Labs</div>
 <a href="writeups/fit-healthy.html">FIT Healthy</a>
 <a href="writeups/cartao-seguro.html">Cartão Seguro</a>
 <a href="writeups/windows-privesc.html">Windows: Scheduled Task</a>
-<div class="sb-group">Artigos / Blog</div>
-<a href="artigos/linux-privesc.html">Arsenal Linux PrivEsc</a>
 <div class="sb-group">Projetos</div>
 <a href="home-lab/index.html">Home Lab</a>
 </nav>
@@ -38,6 +40,16 @@
 <main class="content">
 
   <section class="hero" id="top">
+    <figure class="banner">
+      <svg viewBox="0 0 560 140" role="img" aria-label="KaidraX — segurança ofensiva" xmlns="http://www.w3.org/2000/svg">
+        <polygon class="bnr-hex" points="54,24 93.8,47 93.8,93 54,116 14.2,93 14.2,47"/>
+        <text class="bnr-fg" x="54" y="71" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono', monospace" font-size="30" font-weight="700">K<tspan class="bnr-ac">X</tspan></text>
+        <text x="118" y="64" font-family="'JetBrains Mono', monospace" font-size="38" font-weight="700" letter-spacing="1"><tspan class="bnr-fg">KAIDRA</tspan><tspan class="bnr-ac" dx="3">X</tspan></text>
+        <line class="bnr-line" x1="120" y1="80" x2="372" y2="80"/>
+        <text class="bnr-soft" x="120" y="104" font-family="'JetBrains Mono', monospace" font-size="13" letter-spacing="1">// offensive security · writeups &amp; notes</text>
+      </svg>
+      <figcaption>KaidraX · segurança ofensiva</figcaption>
+    </figure>
     <div class="eyebrow">portfólio · segurança ofensiva</div>
     <h1>Notas de pentest</h1>
     <p class="lead-big">Writeups de máquinas e laboratórios — HackTheBox, VulnHub e labs autorizados —, do recon ao root, com o <strong>mecanismo por trás de cada falha</strong> e como corrigi-la. Foco em exploração de aplicações web e escalonamento de privilégio em Linux e Windows.</p>
@@ -160,12 +172,12 @@
     <div class="eyebrow">contato</div>
     <h2 class="title">Contato</h2>
     <p class="lead">Aberto a oportunidades em segurança ofensiva (pentest, AppSec). Material deste site é de estudo, em labs próprios e autorizados.</p>
-    <div class="links"><a href="https://github.com/kaidra">github.com/kaidra</a></div>
+    <div class="links"><a href="https://github.com/KaidraX">github.com/KaidraX</a></div>
   </section>
 
   <footer>
     <span class="foot-note">// material de estudo · labs próprios e autorizados · nada deve ser usado contra sistemas sem autorização</span>
-    <div class="links"><a href="https://github.com/kaidra">github</a></div>
+    <div class="links"><a href="https://github.com/KaidraX">github</a></div>
   </footer>
 
 </main>
