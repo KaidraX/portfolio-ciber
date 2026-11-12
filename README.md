@@ -1,10 +1,8 @@
-# 🛡️ Ezequiel Amorim — Segurança Ofensiva
+# 🛡️ Kaidra — Segurança Ofensiva
 
-Portfólio de pentest: exploração de aplicações web, escalonamento de privilégio
-(Linux e Windows) e relatório técnico. Cada writeup documenta a cadeia completa,
-**o mecanismo por trás da falha** e **como corrigi-la**.
-
-🔗 **Site:** https://ezequielpentest.github.io/portfolio-ciber/
+Notas e writeups de pentest: exploração de aplicações web, escalonamento de
+privilégio (Linux e Windows) e relatório técnico. Cada writeup documenta a cadeia
+completa, **o mecanismo por trás da falha** e **como corrigi-la**.
 
 ---
 
