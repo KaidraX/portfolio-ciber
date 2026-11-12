@@ -22,7 +22,6 @@
 <a href="index.html" class="active">LEIA-ME</a>
 <div class="sb-group">Certificações e notas</div>
 <a href="certificacoes/roteiro.html">Roteiro: virar pentester / red team</a>
-<a href="artigos/linux-privesc.html">Arsenal de Linux PrivEsc</a>
 <div class="sb-group">Relatórios</div>
 <a href="writeups/htb-unclaimed.html">HTB — Unclaimed</a>
 <a href="writeups/htb-eureka.html">HTB — Eureka</a>
@@ -32,6 +31,9 @@
 <a href="writeups/fit-healthy.html">FIT Healthy</a>
 <a href="writeups/cartao-seguro.html">Cartão Seguro</a>
 <a href="writeups/windows-privesc.html">Windows: Scheduled Task</a>
+<div class="sb-group">Artigos / Blog</div>
+<a href="artigos/index.html">Todos os posts</a>
+<a href="artigos/linux-privesc.html">Arsenal de Linux PrivEsc</a>
 <div class="sb-group">Projetos</div>
 <a href="home-lab/index.html">Home Lab</a>
 </nav>
@@ -41,137 +43,18 @@
 
   <section class="hero" id="top">
     <figure class="banner">
-      <svg viewBox="0 0 560 140" role="img" aria-label="KaidraX — segurança ofensiva" xmlns="http://www.w3.org/2000/svg">
-        <polygon class="bnr-hex" points="54,24 93.8,47 93.8,93 54,116 14.2,93 14.2,47"/>
-        <text class="bnr-fg" x="54" y="71" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono', monospace" font-size="30" font-weight="700">K<tspan class="bnr-ac">X</tspan></text>
-        <text x="118" y="64" font-family="'JetBrains Mono', monospace" font-size="38" font-weight="700" letter-spacing="1"><tspan class="bnr-fg">KAIDRA</tspan><tspan class="bnr-ac" dx="3">X</tspan></text>
-        <line class="bnr-line" x1="120" y1="80" x2="372" y2="80"/>
-        <text class="bnr-soft" x="120" y="104" font-family="'JetBrains Mono', monospace" font-size="13" letter-spacing="1">// offensive security · writeups &amp; notes</text>
-      </svg>
+      <img class="banner-img" src="assets/samurai.png" alt="KaidraX — samurai, segurança ofensiva">
       <figcaption>KaidraX · segurança ofensiva</figcaption>
     </figure>
-    <div class="eyebrow">portfólio · segurança ofensiva</div>
+    <div class="eyebrow">leia-me</div>
     <h1>Notas de pentest</h1>
     <p class="lead-big">Writeups de máquinas e laboratórios — HackTheBox, VulnHub e labs autorizados —, do recon ao root, com o <strong>mecanismo por trás de cada falha</strong> e como corrigi-la. Foco em exploração de aplicações web e escalonamento de privilégio em Linux e Windows.</p>
-  </section>
-
-  <section class="block" id="trilha">
-    <div class="eyebrow">trilha de certificações</div>
-    <h2 class="title">Do fundamento ao OSCP</h2>
-    <div class="trilha">
-      <span class="step">DCPT</span>
-      <span class="step on">eJPT · em progresso</span>
-      <span class="step">Security+</span>
-      <span class="step">PenTest+</span>
-      <span class="step">CPTS</span>
-      <span class="step">OSCP · objetivo</span>
-    </div>
-  </section>
-
-  <section class="block" id="htb">
-    <div class="plat-head"><div class="eyebrow">HackTheBox</div><span class="count">2 writeups</span></div>
-    <div class="grid">
-      <a class="card" href="writeups/htb-unclaimed.html">
-        <div class="top"><span class="plat">HackTheBox · retired</span><span class="diff critico">MÉDIA</span></div>
-        <h3>Unclaimed</h3>
-        <p>Prompt injection num chatbot vaza o system prompt e um "override code" que destrava SQL injection pela camada LLM; daí impersonation no MSSQL, <code>xp_cmdshell</code> e <code>SeBackupPrivilege</code>/<code>robocopy /B</code> no Windows 24H2.</p>
-        <div class="tags"><span class="tag">LLM prompt injection</span><span class="tag">MSSQL impersonation</span><span class="tag">xp_cmdshell</span><span class="tag">SeBackupPrivilege</span></div>
-        <span class="go">ler writeup →</span>
-      </a>
-      <a class="card" href="writeups/htb-eureka.html">
-        <div class="top"><span class="plat">HackTheBox · retired</span><span class="diff critico">DIFÍCIL</span></div>
-        <h3>Eureka</h3>
-        <p>Microsserviços Spring Boot: de um <code>/actuator/heapdump</code> exposto a root, via envenenamento do registro Eureka (MITM no login) e injeção de comando em contexto aritmético Bash num cron root.</p>
-        <div class="tags"><span class="tag">Actuator</span><span class="tag">Eureka poisoning</span><span class="tag">MITM</span><span class="tag">bash arith inj.</span></div>
-        <span class="go">ler writeup →</span>
-      </a>
-    </div>
-  </section>
-
-  <section class="block" id="vulnhub">
-    <div class="plat-head"><div class="eyebrow">VulnHub</div><span class="count">2 writeups</span></div>
-    <div class="grid">
-      <a class="card" href="writeups/vulnhub-napping.html">
-        <div class="top"><span class="plat">VulnHub</span><span class="diff critico">INTERMEDIÁRIO</span></div>
-        <h3>Napping 1.0.1</h3>
-        <p>Phishing via um admin bot que visita links submetidos e preenche login numa página falsa; depois reuso de credencial, um script de cron gravável e um <code>sudo vim</code> até root.</p>
-        <div class="tags"><span class="tag">phishing bot</span><span class="tag">reverse tabnabbing</span><span class="tag">cron writable</span><span class="tag">sudo GTFOBins</span></div>
-        <span class="go">ler writeup →</span>
-      </a>
-      <a class="card" href="writeups/vikings.html">
-        <div class="top"><span class="plat">VulnHub</span><span class="diff critico">CRÍTICO</span></div>
-        <h3>Vikings — da web ao root</h3>
-        <p>Enumeração web leva a um Base64 que esconde um ZIP com senha fraca; dentro, esteganografia numa imagem revela credenciais SSH; privesc por um serviço RPyC rodando como root sem autenticação.</p>
-        <div class="tags"><span class="tag">dir enum</span><span class="tag">esteganografia</span><span class="tag">password cracking</span><span class="tag">RPyC privesc</span></div>
-        <span class="go">ler writeup →</span>
-      </a>
-    </div>
-  </section>
-
-  <section class="block" id="labs">
-    <div class="plat-head"><div class="eyebrow">Labs — ExploitMind / HackAcademy</div><span class="count">3 writeups</span></div>
-    <p class="lead">Labs levados do acesso inicial ao comprometimento total, indexados por técnica. Credenciais e flags mascaradas — o valor está na metodologia.</p>
-    <div class="grid">
-      <a class="card" href="writeups/fit-healthy.html">
-        <div class="top"><span class="plat">ExploitMind · D002</span><span class="diff critico">CRÍTICO</span></div>
-        <h3>FIT Healthy Center — web até root</h3>
-        <p>SQLi não autenticada entrega credenciais em texto plano; LFI via <code>php://filter</code> vaza o código-fonte; reuso de senha dá SSH; privesc por regra sudo + config do Apache gravável.</p>
-        <div class="tags"><span class="tag">SQLi UNION</span><span class="tag">auth bypass</span><span class="tag">LFI</span><span class="tag">sudo privesc</span></div>
-        <span class="go">ler writeup →</span>
-      </a>
-      <a class="card" href="writeups/cartao-seguro.html">
-        <div class="top"><span class="plat">HackAcademy</span><span class="diff critico">CRÍTICO</span></div>
-        <h3>Cartão Seguro — SSTI até root</h3>
-        <p>Injeção de template Jinja2 não autenticada vira RCE, vaza a <code>SECRET_KEY</code> e, com <code>doas</code> mal configurado, escala direto a root — sem exploit de kernel.</p>
-        <div class="tags"><span class="tag">SSTI</span><span class="tag">RCE</span><span class="tag">doas privesc</span></div>
-        <span class="go">ler writeup →</span>
-      </a>
-      <a class="card" href="writeups/windows-privesc.html">
-        <div class="top"><span class="plat">Linux → Windows</span><span class="diff alto">ALTO</span></div>
-        <h3>Scheduled Task hijack (Windows)</h3>
-        <p>Pivot em Linux, reuso de senha do GLPI, acesso via TeamViewer e privesc abusando de uma Scheduled Task que roda como Administrator apontando para um binário gravável por qualquer usuário.</p>
-        <div class="tags"><span class="tag">pivoting</span><span class="tag">reuso de senha</span><span class="tag">CWE-732</span><span class="tag">Windows privesc</span></div>
-        <span class="go">ler writeup →</span>
-      </a>
-    </div>
-  </section>
-
-  <section class="block" id="artigos">
-    <div class="plat-head"><div class="eyebrow">Artigos / Blog</div><span class="count">1 artigo</span></div>
-    <p class="lead">Notas técnicas por classe de falha e análises de CVE em destaque — o mecanismo, a detecção e a mitigação.</p>
-    <div class="grid">
-      <a class="card" href="artigos/linux-privesc.html">
-        <div class="top"><span class="plat">cheatsheet</span><span class="diff estudo">TÉCNICAS</span></div>
-        <h3>Arsenal de Linux PrivEsc</h3>
-        <p>Compêndio de vetores: sudo/GTFOBins, LD_PRELOAD e LD_LIBRARY_PATH, cron PATH hijack, tar wildcard injection, SUID + Exim CVE-2016-1531, bash function import, PS4/xtrace e NFS no_root_squash.</p>
-        <div class="tags"><span class="tag">sudo</span><span class="tag">SUID</span><span class="tag">LD_PRELOAD</span><span class="tag">wildcard inj.</span><span class="tag">NFS</span></div>
-        <span class="go">ler notas →</span>
-      </a>
-    </div>
-  </section>
-
-  <section class="block" id="projetos">
-    <div class="plat-head"><div class="eyebrow">Projetos</div><span class="count">1 projeto</span></div>
-    <div class="grid">
-      <a class="card" href="home-lab/index.html">
-        <div class="top"><span class="plat">lab-as-code</span><span class="diff estudo">INFRA</span></div>
-        <h3>Home Lab Ofensivo</h3>
-        <p>Laboratório de pentest em rede isolada: atacante + alvos vulneráveis + mini-AD (GOAD), provisionado como código. Arquitetura, caminho de construção e checklist de isolamento.</p>
-        <div class="tags"><span class="tag">VirtualBox</span><span class="tag">Kali</span><span class="tag">AD/GOAD</span><span class="tag">rede isolada</span></div>
-        <span class="go">ver projeto →</span>
-      </a>
-    </div>
-  </section>
-
-  <section class="block" id="thm">
-    <div class="plat-head"><div class="eyebrow">TryHackMe</div><span class="count">0 writeups</span></div>
-    <div class="empty">Em andamento. Salas e writeups do <b>TryHackMe</b> entram aqui, indexados por técnica.</div>
+    <p class="lead">Tudo em labs próprios e autorizados, com fins de estudo. Os relatórios, o roteiro de estudo, as notas técnicas e os projetos estão no menu ao lado.</p>
   </section>
 
   <section class="block" id="contato">
     <div class="eyebrow">contato</div>
-    <h2 class="title">Contato</h2>
-    <p class="lead">Aberto a oportunidades em segurança ofensiva (pentest, AppSec). Material deste site é de estudo, em labs próprios e autorizados.</p>
+    <p class="lead">Aberto a oportunidades em segurança ofensiva (pentest, AppSec).</p>
     <div class="links"><a href="https://github.com/KaidraX">github.com/KaidraX</a></div>
   </section>
 

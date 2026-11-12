@@ -133,9 +133,11 @@ strong,b{color:var(--fg)}
 .block{padding-top:12px;padding-bottom:12px}
 
 /* banner do LEIA-ME */
-.banner{margin:8px 0 22px}
+.banner{margin:4px 0 18px}
 .banner svg{display:block;width:100%;max-width:560px;height:auto}
 .banner figcaption{font-family:var(--mono);font-size:.72rem;color:var(--soft);margin-top:8px;letter-spacing:.04em}
+.banner-img{display:block;height:auto;max-height:360px;width:auto;filter:invert(1)}
+:root[data-theme="light"] .banner-img{filter:none}
 .banner .bnr-hex{fill:var(--accent-soft);stroke:var(--accent);stroke-width:2.5}
 .banner .bnr-fg{fill:var(--fg)}
 .banner .bnr-ac{fill:var(--accent)}
