@@ -10,12 +10,34 @@
 <link rel="stylesheet" href="../assets/app.css">
 </head>
 <body>
-<header class="topbar"><div class="wrap">
-  <a class="brand" href="../index.html"><span class="p">~/</span>kaidra<span class="blink">_</span></a>
-  <nav><a href="../index.html#labs">labs</a><a href="../index.html#htb">htb</a><a href="../index.html#thm">thm</a><a href="../index.html#vulnhub">vulnhub</a><a href="../index.html#artigos">artigos</a><a href="../index.html#projetos">projetos</a><a href="../index.html#contato">contato</a></nav>
-</div></header>
+<input type="checkbox" id="nt" class="nav-toggle">
+<label for="nt" class="nav-burger"><span class="mk">K</span> Menu</label>
+<div class="layout">
+<aside class="sidebar">
+<a class="sb-brand" href="../index.html"><span class="mark">K</span>Kaidra<span class="tag">.sec</span></a>
+<div class="sb-sub">Segurança ofensiva</div>
+<nav class="sb-nav">
+<a href="../index.html">Início</a>
+<div class="sb-group">HackTheBox</div>
+<a href="../writeups/htb-unclaimed.html">Unclaimed</a>
+<a href="../writeups/htb-eureka.html">Eureka</a>
+<div class="sb-group">VulnHub</div>
+<a href="../writeups/vulnhub-napping.html">Napping</a>
+<a href="../writeups/vikings.html">Vikings</a>
+<div class="sb-group">Labs</div>
+<a href="../writeups/fit-healthy.html">FIT Healthy</a>
+<a href="../writeups/cartao-seguro.html">Cartão Seguro</a>
+<a href="../writeups/windows-privesc.html">Windows: Scheduled Task</a>
+<div class="sb-group">Artigos / Blog</div>
+<a href="../artigos/linux-privesc.html">Arsenal Linux PrivEsc</a>
+<div class="sb-group">Projetos</div>
+<a href="../home-lab/index.html" class="active">Home Lab</a>
+</nav>
+<div class="sb-foot">Material de estudo · labs autorizados · <a href="../index.html#contato">contato</a></div>
+</aside>
+<main class="content">
 
-<main class="wrap page">
+<div class="page">
   <a class="back" href="../index.html#projetos">← voltar ao portfólio</a>
   <h1 class="title">Home Lab Ofensivo</h1>
   <div class="meta-row">
@@ -79,11 +101,13 @@
       <li>Snapshots antes de cada sessão.</li>
     </ul>
   </div>
-</main>
+</div>
 
 <footer><div class="wrap">
   <span class="foot-note">// construído para estudo de pentest · labs próprios e autorizados</span>
   <div class="links"><a href="../index.html">topo ↑</a><span class="foot-note">DCPT → eJPT → Security+ → PenTest+ → CPTS → OSCP</span></div>
 </div></footer>
+</main>
+</div>
 </body>
 </html>

@@ -1,4 +1,4 @@
 # Política de divulgação responsável
-Contact: https://github.com/ezequielpentest/portfolio-ciber/issues
+Contact: https://github.com/kaidra
 Preferred-Languages: pt-BR, en
 Expires: 2027-11-12T00:00:00.000Z
