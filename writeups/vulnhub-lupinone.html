@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data:; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'; upgrade-insecure-requests">
+<meta name="referrer" content="no-referrer">
+<meta name="description" content="Writeup Empire: LupinOne (VulnHub) — do recon ao root: fuzzing de ~userdir, Base58, quebra de passphrase SSH, hijack de biblioteca Python e abuso de sudo pip.">
+<title>VulnHub — Empire: LupinOne — KaidraX</title>
+<link rel="stylesheet" href="../assets/app.css">
+<script src="../assets/theme.js"></script>
+</head>
+<body>
+<input type="checkbox" id="nt" class="nav-toggle">
+<label for="nt" class="nav-burger"><span class="mk">☰</span> Menu</label>
+<div class="layout">
+<aside class="sidebar">
+<a class="sb-brand" href="../index.html"><span class="mark">K</span>Kaidra<span class="tag">X</span></a>
+<div class="sb-sub">Segurança ofensiva</div>
+<button type="button" id="themeToggle" class="theme-toggle" aria-label="Alternar tema"><span class="tt-ico tt-to-light">☀</span><span class="tt-ico tt-to-dark">☾</span><span class="tt-lbl tt-to-light">Tema claro</span><span class="tt-lbl tt-to-dark">Tema escuro</span></button>
+<nav class="sb-nav">
+<a href="../index.html">LEIA-ME</a>
+<div class="sb-group">Certificações e notas</div>
+<a href="../certificacoes/roteiro.html">Roteiro: virar pentester / red team</a>
+<div class="sb-group">Relatórios</div>
+<a href="../writeups/htb-unclaimed.html">HTB — Unclaimed</a>
+<a href="../writeups/htb-eureka.html">HTB — Eureka</a>
+<a href="../writeups/vulnhub-napping.html">VulnHub — Napping</a>
+<a href="../writeups/vikings.html">VulnHub — Vikings</a>
+<a href="../writeups/vulnhub-lupinone.html" class="active">VulnHub — LupinOne</a>
+<div class="sb-group">Máquinas / Labs</div>
+<a href="../writeups/fit-healthy.html">FIT Healthy</a>
+<a href="../writeups/cartao-seguro.html">Cartão Seguro</a>
+<a href="../writeups/windows-privesc.html">Windows: Scheduled Task</a>
+<div class="sb-group">Artigos / Blog</div>
+<a href="../artigos/index.html">Todos os posts</a>
+<a href="../artigos/linux-privesc.html">Arsenal de Linux PrivEsc</a>
+<div class="sb-group">Projetos</div>
+<a href="../home-lab/index.html">Home Lab</a>
+</nav>
+<div class="sb-foot">Material de estudo · labs autorizados · <a href="../index.html#contato">contato</a></div>
+</aside>
+<main class="content">
+
+  <a class="back" href="../index.html">← voltar ao LEIA-ME</a>
+
+  <section class="writeup" id="lupinone">
+    <h1>Empire: LupinOne — do recon ao root</h1>
+    <div class="meta-row">
+      <span class="plat">VulnHub · Empire #1</span>
+      <span class="diff critico">MÉDIO</span>
+      <span class="tag">web enum</span><span class="tag">fuzzing</span><span class="tag">Base58</span><span class="tag">SSH key cracking</span><span class="tag">Python library hijack</span><span class="tag">sudo/pip</span>
+    </div>
+
+    <p class="u-muted">Uma box temática do ladrão de casaca Arsène Lupin: nada vem de graça. A cadeia é um pequeno assalto — passar pelo <code>robots.txt</code>, arrombar um dotfile, tirar uma chave privada de um disfarce em Base58 e sair do prédio com o <code>root.txt</code>. Abaixo, do recon ao root, com o <b>porquê</b> de cada passo.</p>
+
+    <div class="wu-sec">
+      <h2>1. O alvo</h2>
+      <p>Box <b>Empire: LupinOne</b> (VulnHub), de <b>icex64 &amp; Empire Cybersecurity</b> — primeira da série “Empire”, dificuldade <b>média</b>. Vem como <code>.ova</code> para rodar offline em VM.</p>
+      <p><b>Classes exercitadas:</b> enumeração web, fuzzing de diretório/arquivo, decodificação Base58, quebra de passphrase de chave SSH, <i>hijack</i> de biblioteca Python e abuso de <code>sudo</code> via <code>pip install</code>.</p>
+    </div>
+
+    <div class="wu-sec">
+      <h2>2. Recon</h2>
+      <p>Como é uma VM local em rede host-only, o primeiro passo é achar o IP. Usei <code>netdiscover</code> no segmento e depois um <code>nmap</code> completo:</p>
+      <pre><code>sudo nmap -A -Pn -sV -sC -p- --min-rate=1000 10.0.2.12</code></pre>
+      <p>Superfície enxuta: <b>22/tcp</b> OpenSSH 8.4p1 e <b>80/tcp</b> Apache 2.4.48. O <code>http-enum</code> já apontou <code>/robots.txt</code>, um <code>/image/</code> com listagem aberta e o <code>/manual/</code> padrão. A home só tinha o desenho do Lupin de cartola — tema bonito, nenhuma porta óbvia.</p>
+    </div>
+
+    <div class="wu-sec">
+      <h2>3. robots.txt e o truque do <code>~</code></h2>
+      <p>Quando a app é vazia assim, o <code>/robots.txt</code> é o primeiro lugar — autores de CTF adoram plantar pista ali. E tinha: <code>Disallow: /~myfiles</code>.</p>
+      <div class="mech">
+        <p>O prefixo <code>~</code> é um <b>tell</b>: é a convenção do <b>mod_userdir</b> do Apache, que expõe o diretório pessoal de um usuário como <code>/~usuario/</code>. Ou seja, o formato é a pista — mas o nome <code>myfiles</code> em si era isca: <code>/~myfiles/</code> devolvia <b>404</b>. O diretório real existe, só tem outro nome.</p>
+      </div>
+    </div>
+
+    <div class="wu-sec">
+      <h2>4. Fuzzing do diretório de usuário</h2>
+      <p>Sabendo o formato <code>/~algo/</code>, o problema vira força bruta de nome. Usei o <code>ffuf</code> filtrando os <code>403</code> pra cortar ruído:</p>
+      <pre><code>ffuf -w .../directory-list-2.3-medium.txt \
+     -u http://10.0.2.12/~FUZZ -fc 403</code></pre>
+      <p>Saiu um hit: <code>secret</code>. Em <code>/~secret/</code>, um bilhete do usuário <b>icex64</b> dizia ter escondido ali uma chave privada SSH, com uma passphrase “segura contra a <code>fasttrack</code>” — uma wordlist famosa por ser curtíssima. (Spoiler: não era segura.) Arquivo escondido em diretório conhecido também é problema de fuzzing — desta vez mirando <b>dotfiles</b> com extensões:</p>
+      <pre><code>ffuf -w .../directory-list-2.3-medium.txt \
+     -u http://10.0.2.12/~secret/.FUZZ -fc 403 -e .php,.txt,.html</code></pre>
+      <p>Repare no ponto antes de <code>FUZZ</code> (<code>.FUZZ</code>): é assim que se caça arquivo oculto. Resultado: <code>.mysecret.txt</code>.</p>
+    </div>
+
+    <div class="wu-sec">
+      <h2>5. Decodificando a chave</h2>
+      <p>Baixei o arquivo e vi um blob alfanumérico longo, <b>sem <code>+</code>, <code>/</code> ou <code>=</code></b>. Esse detalhe importa: a ausência desses caracteres já descarta Base64 padrão.</p>
+      <div class="mech">
+        <p>O <b>Base58</b> usa um alfabeto reduzido — tira justamente os caracteres ambíguos (<code>0</code>, <code>O</code>, <code>I</code>, <code>l</code>) e os símbolos <code>+</code>/<code>/</code>/<code>=</code>. É o mesmo encoding de endereços Bitcoin. Logo, blob “limpo” desses símbolos é um forte palpite de Base58, confirmado num identificador de cifra.</p>
+      </div>
+      <p>Jogando no CyberChef com a receita <b>From Base58</b>, saiu uma <b>chave privada OpenSSH</b>. Salvei como <code>id_rsa</code> e tranquei a permissão (<code>chmod 600</code>, senão o SSH recusa a chave).</p>
+    </div>
+
+    <div class="wu-sec">
+      <h2>6. Quebrando a passphrase</h2>
+      <p>A chave era protegida por passphrase. Um detalhe prático: dependendo do build do <b>John</b>, o formato moderno de chave OpenSSH dá erro de <code>libcrypto</code>. A volta é converter para o PEM antigo com o <code>puttygen</code> (pacote <code>putty-tools</code>):</p>
+      <pre><code>puttygen id_rsa -O private-openssh -o id_rsa_fixed
+chmod 600 id_rsa_fixed
+ssh2john id_rsa_fixed &gt; john_id</code></pre>
+      <div class="mech">
+        <p>O <code>ssh2john</code> converte a chave cifrada num <b>hash</b> que o John entende: ele não “abre” a chave, apenas tenta cada palavra da wordlist como passphrase até derivar a chave corretamente. É cracking offline — não toca no alvo.</p>
+      </div>
+      <p>Como o icex64 jurou que a <code>fasttrack.txt</code> não pegaria, foi a primeira que testei. Em segundos saiu: <code>P@55w0rd!</code>. <b>Lição real:</b> confiança numa wordlist curta vale zero — “eles nunca vão adivinhar” é a frase que precede quase todo comprometimento.</p>
+    </div>
+
+    <div class="wu-sec">
+      <h2>7. Foothold — icex64</h2>
+      <pre><code>ssh icex64@10.0.2.12 -i id_rsa_fixed
+cat user.txt</code></pre>
+      <p>Primeira flag na mão.</p>
+    </div>
+
+    <div class="wu-sec">
+      <h2>8. Movimento lateral — icex64 → arsene</h2>
+      <p>Primeiro reflexo em shell novo: <code>sudo -l</code>.</p>
+      <pre><code>(arsene) NOPASSWD: /usr/bin/python3.9 /home/arsene/heist.py</code></pre>
+      <p>Posso rodar um script Python específico <b>como arsene</b>, sem senha. O <code>heist.py</code> só faz <code>import webbrowser</code> e abre uma URL. E aí veio o pulo do gato:</p>
+      <pre><code>ls -la /usr/lib/python3.9 | grep webbrowser
+-rwxrwxrwx 1 root root ... webbrowser.py</code></pre>
+      <div class="mech">
+        <p><b>Python resolve <code>import</code> procurando o módulo no seu caminho de busca</b> (<code>sys.path</code>), e <code>webbrowser</code> é um módulo da biblioteca padrão que mora em <code>/usr/lib/python3.9/webbrowser.py</code>. Esse arquivo estava <b>gravável por qualquer um</b> (<code>rwxrwxrwx</code> — CWE-732). Então, quando <code>heist.py</code> faz <code>import webbrowser</code> rodando como arsene, ele carrega e <b>executa</b> o conteúdo desse arquivo — que eu controlo. É o clássico <b>library hijack</b>: o código roda com o privilégio de quem importa, não de quem escreveu.</p>
+      </div>
+      <p>Coloquei um listener (<code>nc -lvnp 1234</code>), adicionei uma reverse shell no topo do <code>webbrowser.py</code> e disparei a regra do sudo:</p>
+      <pre><code>sudo -u arsene python3.9 /home/arsene/heist.py</code></pre>
+      <p>O <code>import</code> executou meu código e voltou um shell como arsene. Estabilizei com <code>python3 -c 'import pty; pty.spawn("/bin/bash")'</code>.</p>
+    </div>
+
+    <div class="wu-sec">
+      <h2>9. Escalada — arsene → root</h2>
+      <p>De novo <code>sudo -l</code>, agora como arsene:</p>
+      <pre><code>(ALL : ALL) NOPASSWD: /usr/bin/pip install *</code></pre>
+      <div class="mech">
+        <p>Primitivo conhecido do <b>GTFOBins</b>. O <code>pip install</code> de um diretório local <b>executa o <code>setup.py</code> do pacote</b> durante a instalação. Se o <code>pip</code> roda como root, o <code>setup.py</code> roda como root. O curinga <code>*</code> na regra permite passar qualquer caminho — inclusive um pacote forjado por mim.</p>
+      </div>
+      <p>A receita padrão do GTFOBins cria um pacote mínimo cujo <code>setup.py</code> abre um shell, e manda o <code>sudo pip install</code> processá-lo:</p>
+      <pre><code>TF=$(mktemp -d)
+echo "import os; os.execl('/bin/sh','sh','-c','sh &lt;\$(tty) &gt;\$(tty) 2&gt;\$(tty)')" &gt; $TF/setup.py
+sudo pip install $TF</code></pre>
+      <p>No instante em que o <code>pip</code> processou o diretório, caí num shell root — <code>id</code> confirmou <code>uid=0(root)</code> e o <code>root.txt</code> estava em <code>/root/</code>.</p>
+    </div>
+
+    <div class="wu-sec">
+      <div class="fix">
+        <h2>Como eu fecharia isso</h2>
+        <ul>
+          <li><b>webbrowser.py world-writable (CWE-732):</b> módulo de biblioteca padrão jamais deve ser gravável por usuário comum. Permissão correta é <code>root:root 644</code>. Esse é o bug que derruba todo o lateral.</li>
+          <li><b>Regra sudo com curinga/pip:</b> <code>NOPASSWD: pip install *</code> é entregar root. Nunca autorizar via <code>sudo</code> binários que executam código arbitrário (<code>pip</code>, <code>python</code>, editores, interpretadores) nem usar curingas. Se precisar, restringir a um pacote/caminho fixo e validado.</li>
+          <li><b>Rodar script de outro usuário como ele:</b> a regra <code>(arsene) python heist.py</code> só é segura se <b>todo</b> o que o script importa for imutável pelo chamador — o que não era o caso.</li>
+          <li><b>Segurança por obscuridade:</b> esconder a chave num dotfile e confiar numa passphrase fraca não protege nada. Chave privada não fica em servidor web; passphrase forte e única.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="wu-sec">
+      <h2>Classes exploradas</h2>
+      <ul>
+        <li><b>Enumeração web + fuzzing</b> — <code>robots.txt</code>, <code>mod_userdir</code>, ffuf de diretório e de dotfile.</li>
+        <li><b>Encoding</b> — reconhecer Base58 pela ausência de <code>+//=</code>.</li>
+        <li><b>Credential cracking</b> — <code>ssh2john</code> + conversão de formato de chave.</li>
+        <li><b>Python library hijack</b> — módulo da stdlib gravável (CWE-732).</li>
+        <li><b>Abuso de sudo</b> — <code>pip install</code> executando <code>setup.py</code> como root (GTFOBins).</li>
+      </ul>
+      <p class="u-muted">Fonte da box: <a href="https://www.vulnhub.com/entry/empire-lupinone,750/">VulnHub — Empire: LupinOne (#750)</a>. Resolvida em VM própria, offline, para estudo.</p>
+    </div>
+
+  </section>
+
+  <footer>
+    <span class="foot-note">// Empire: LupinOne · VulnHub · resolvido em VM própria e autorizada · DCPT → eJPT → Security+ → PenTest+ → CPTS → OSCP</span>
+    <div class="links"><a href="../index.html">topo ↑</a><a href="https://github.com/KaidraX">github</a></div>
+  </footer>
+
+</main>
+</div>
+</body>
+</html>
